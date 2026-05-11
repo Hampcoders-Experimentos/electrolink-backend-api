@@ -18,7 +18,9 @@ public class CreateReportPhotoCommandFromResourceAssembler {
   public static AddPhotoCommand toCommandFromResource(CreateReportPhotoResource resource) {
     return new AddPhotoCommand(
         resource.reportId(),
-        resource.url()
+        resource.photoData(),
+        resource.fileName(),
+        resource.contentType()
     );
   }
 }

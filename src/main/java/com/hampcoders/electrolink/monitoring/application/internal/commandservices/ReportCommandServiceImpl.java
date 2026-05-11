@@ -1,5 +1,6 @@
 package com.hampcoders.electrolink.monitoring.application.internal.commandservices;
 
+import com.hampcoders.electrolink.monitoring.application.internal.outboundservices.PhotoStorageService;
 import com.hampcoders.electrolink.monitoring.domain.model.aggregates.Report;
 import com.hampcoders.electrolink.monitoring.domain.model.commands.AddPhotoCommand;
 import com.hampcoders.electrolink.monitoring.domain.model.commands.AddReportCommand;
@@ -21,6 +22,7 @@ public class ReportCommandServiceImpl implements ReportCommandService {
   private final ServiceOperationRepository serviceOperationRepository;
   private final ReportRepository reportRepository;
   private final EntityManager entityManager;
+  private final PhotoStorageService photoStorageService;
 
   /**
    * Constructor for ReportCommandServiceImpl.
@@ -28,12 +30,15 @@ public class ReportCommandServiceImpl implements ReportCommandService {
    * @param reportRepository The repository for managing Report entities.
    * @param entityManager The JPA EntityManager for managing ReportPhoto persistence.
    * @param serviceOperationRepository The repository for validating ServiceOperation existence.
+   * @param photoStorageService The service for storing photo files.
    */
   public ReportCommandServiceImpl(ReportRepository reportRepository, EntityManager entityManager,
-                                  ServiceOperationRepository serviceOperationRepository) {
+                                  ServiceOperationRepository serviceOperationRepository,
+                                  PhotoStorageService photoStorageService) {
     this.reportRepository = reportRepository;
     this.entityManager = entityManager;
     this.serviceOperationRepository = serviceOperationRepository;
+    this.photoStorageService = photoStorageService;
   }
 
   /**
@@ -77,9 +82,13 @@ public class ReportCommandServiceImpl implements ReportCommandService {
    */
   @Override
   public Long handle(AddPhotoCommand command) {
+    String storedUrl = photoStorageService.storePhoto(
+        command.photoData(),
+        command.fileName(),
+        command.contentType());
     var reportPhoto = new ReportPhoto(
         command.reportId(),
-        command.url()
+        storedUrl
     );
     entityManager.persist(reportPhoto);
     return reportPhoto.getId();

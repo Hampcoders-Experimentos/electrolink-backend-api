@@ -2,6 +2,7 @@ package com.hampcoders.electrolink.sdp.domain.model.aggregates;
 
 import com.hampcoders.electrolink.sdp.domain.model.entities.Bill;
 import com.hampcoders.electrolink.sdp.domain.model.entities.Photo;
+import com.hampcoders.electrolink.sdp.domain.model.events.RequestCreatedEvent;
 import com.hampcoders.electrolink.sdp.interfaces.rest.resources.CreateRequestResource;
 import com.hampcoders.electrolink.shared.domain.model.aggregates.AuditableAbstractAggregateRoot;
 import jakarta.persistence.AttributeOverride;
@@ -37,6 +38,7 @@ public class Request extends AuditableAbstractAggregateRoot<Request> {
 
   private String problemDescription;
   private LocalDate scheduledDate;
+  private boolean isPriority;
 
   @Embedded
   @AttributeOverrides({
@@ -74,6 +76,15 @@ public class Request extends AuditableAbstractAggregateRoot<Request> {
                  LocalDate scheduledDate,
                  Bill bill,
                  List<Photo> photos) {
+    this(clientId, technicianId, propertyId, serviceId, problemDescription, scheduledDate, bill, photos, false);
+  }
+
+  public Request(String clientId, String technicianId, String propertyId, String serviceId,
+                 String problemDescription,
+                 LocalDate scheduledDate,
+                 Bill bill,
+                 List<Photo> photos,
+                 boolean isPriority) {
     this.clientId = clientId;
     this.technicianId = technicianId;
     this.propertyId = propertyId;
@@ -82,6 +93,7 @@ public class Request extends AuditableAbstractAggregateRoot<Request> {
     this.scheduledDate = scheduledDate;
     this.bill = bill;
     this.photos = photos != null ? photos : new ArrayList<>();
+    this.isPriority = isPriority;
   }
 
   /**
@@ -107,6 +119,7 @@ public class Request extends AuditableAbstractAggregateRoot<Request> {
     this.serviceId = resource.serviceId();
     this.problemDescription = resource.problemDescription();
     this.scheduledDate = resource.scheduledDate();
+    this.isPriority = resource.isPriority();
 
     this.bill = new Bill(
         resource.bill().billingPeriod(),
@@ -121,5 +134,18 @@ public class Request extends AuditableAbstractAggregateRoot<Request> {
         this.photos.add(new Photo(photoResource.photoId(), photoResource.url()));
       });
     }
+  }
+
+  public void assignTechnician(String technicianId) {
+    this.technicianId = technicianId;
+  }
+
+  public void registerCreatedEvent() {
+    registerEvent(new RequestCreatedEvent(this.getId(), Long.valueOf(this.clientId),
+        this.serviceId, this.isPriority, this.propertyId));
+  }
+
+  public boolean isPriority() {
+    return isPriority;
   }
 }

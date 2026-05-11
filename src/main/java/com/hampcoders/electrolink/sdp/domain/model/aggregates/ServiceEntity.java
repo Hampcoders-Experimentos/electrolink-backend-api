@@ -2,6 +2,7 @@ package com.hampcoders.electrolink.sdp.domain.model.aggregates;
 
 import com.hampcoders.electrolink.sdp.domain.model.entities.ComponentQuantity;
 import com.hampcoders.electrolink.sdp.domain.model.entities.Tag;
+import com.hampcoders.electrolink.sdp.domain.model.events.ServiceCataloguedEvent;
 import com.hampcoders.electrolink.sdp.domain.model.valueobjects.Policy;
 import com.hampcoders.electrolink.sdp.domain.model.valueobjects.Restriction;
 import com.hampcoders.electrolink.shared.domain.model.aggregates.AuditableAbstractAggregateRoot;
@@ -107,6 +108,10 @@ public class ServiceEntity extends AuditableAbstractAggregateRoot<ServiceEntity>
     this.tags.addAll(updated.tags);
     this.components.clear();
     this.components.addAll(updated.components);
+  }
+
+  public void registerCreatedEvent() {
+    registerEvent(new ServiceCataloguedEvent(this.getId(), this.createdBy, this.name));
   }
 
 }

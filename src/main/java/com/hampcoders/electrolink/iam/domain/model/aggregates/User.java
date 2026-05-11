@@ -1,6 +1,7 @@
 package com.hampcoders.electrolink.iam.domain.model.aggregates;
 
 import com.hampcoders.electrolink.iam.domain.model.entities.Role;
+import com.hampcoders.electrolink.iam.domain.model.events.UserRegisteredEvent;
 import com.hampcoders.electrolink.shared.domain.model.aggregates.AuditableAbstractAggregateRoot;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -72,6 +73,7 @@ public class User extends AuditableAbstractAggregateRoot<User> {
   public User(String username, String password, List<Role> roles) {
     this(username, password);
     addRoles(roles);
+    registerEvent(new UserRegisteredEvent(this.getId(), this.username));
   }
 
   /**

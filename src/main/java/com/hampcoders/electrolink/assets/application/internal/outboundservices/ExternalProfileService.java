@@ -3,12 +3,15 @@ package com.hampcoders.electrolink.assets.application.internal.outboundservices;
 import com.hampcoders.electrolink.assets.domain.model.valueobjects.TechnicianId;
 import com.hampcoders.electrolink.profiles.interfaces.acl.ProfilesContextFacade;
 import java.util.Optional;
+
+import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
 /**
  * Service to interact with the Profiles context via its ACL facade.
  */
 @Service
+@Component("sdpExternalProfileService")
 public class ExternalProfileService {
 
   private final ProfilesContextFacade profilesContextFacade;

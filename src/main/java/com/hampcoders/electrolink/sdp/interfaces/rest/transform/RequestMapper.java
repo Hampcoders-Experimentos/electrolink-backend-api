@@ -40,7 +40,8 @@ public class RequestMapper {
         resource.problemDescription(),
         resource.scheduledDate(),
         bill,
-        photos
+        photos,
+        resource.isPriority()
     );
   }
 }

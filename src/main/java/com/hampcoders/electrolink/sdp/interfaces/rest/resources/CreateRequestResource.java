@@ -23,7 +23,8 @@ public record CreateRequestResource(
     String problemDescription,
     LocalDate scheduledDate,
     BillResource bill,
-    List<PhotoResource> photos
+    List<PhotoResource> photos,
+    boolean isPriority
 ) {
   /**
    * Resource representing billing information for a service request.

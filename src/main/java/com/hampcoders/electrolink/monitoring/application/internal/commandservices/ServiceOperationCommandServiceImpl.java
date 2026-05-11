@@ -57,11 +57,6 @@ public class ServiceOperationCommandServiceImpl implements ServiceOperationComma
 
     ServiceStatus newStatus = ServiceStatus.valueOf(command.newStatus());
     serviceOperation.updateStatus(newStatus);
-
-    if (newStatus == ServiceStatus.COMPLETED) {
-      serviceOperation.setCompletedAt(OffsetDateTime.now());
-    }
-
     serviceOperationRepository.save(serviceOperation);
   }
 }

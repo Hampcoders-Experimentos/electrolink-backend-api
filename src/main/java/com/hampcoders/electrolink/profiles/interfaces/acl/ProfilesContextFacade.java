@@ -5,6 +5,7 @@ import com.hampcoders.electrolink.profiles.domain.model.commands.DeleteProfileCo
 import com.hampcoders.electrolink.profiles.domain.model.commands.UpdateProfileCommand;
 import com.hampcoders.electrolink.profiles.domain.model.queries.GetProfileByEmailQuery;
 import com.hampcoders.electrolink.profiles.domain.model.queries.GetProfileByIdQuery;
+import com.hampcoders.electrolink.profiles.domain.model.queries.GetProfilesByRoleQuery;
 import com.hampcoders.electrolink.profiles.domain.model.valueobjects.Role;
 import com.hampcoders.electrolink.profiles.domain.services.ProfileCommandService;
 import com.hampcoders.electrolink.profiles.domain.services.ProfileQueryService;
@@ -13,6 +14,7 @@ import com.hampcoders.electrolink.profiles.interfaces.rest.transform.ProfileReso
 import com.hampcoders.electrolink.shared.domain.model.aggregates.AuditableAbstractAggregateRoot;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -36,6 +38,13 @@ public class ProfilesContextFacade {
     var query = new GetProfileByEmailQuery(email);
     return profileQueryService.handle(query)
       .map(ProfileResourceFromEntityAssembler::toResourceFromEntity);
+  }
+
+  public List<ProfileResource> fetchProfilesByRole(Role role) {
+    var query = new GetProfilesByRoleQuery(role);
+    return profileQueryService.handle(query).stream()
+      .map(ProfileResourceFromEntityAssembler::toResourceFromEntity)
+      .toList();
   }
 
   public Long fetchProfileIdByEmail(String email) {

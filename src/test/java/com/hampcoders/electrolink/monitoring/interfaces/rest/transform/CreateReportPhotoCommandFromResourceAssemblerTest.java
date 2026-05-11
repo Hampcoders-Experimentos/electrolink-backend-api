@@ -12,9 +12,11 @@ public class CreateReportPhotoCommandFromResourceAssemblerTest {
     void toCommandFromResource_ShouldMapResourceToCommand() {
         // Arrange
         Long reportId = 42L;
-        String url = "https://storage.electrolink.com/reports/42/photo_xyz.jpg";
+        byte[] photoData = new byte[]{1, 2, 3};
+        String fileName = "photo_xyz.jpg";
+        String contentType = "image/jpeg";
 
-        var resource = new CreateReportPhotoResource(reportId, url);
+        var resource = new CreateReportPhotoResource(reportId, photoData, fileName, contentType);
 
         // Act
         var command = CreateReportPhotoCommandFromResourceAssembler.toCommandFromResource(resource);
@@ -23,6 +25,8 @@ public class CreateReportPhotoCommandFromResourceAssemblerTest {
         assertNotNull(command, "El comando retornado no debe ser nulo.");
         assertEquals(reportId, command.reportId(),
                 "El ReportId debe ser mapeado y envuelto en un Value Object.");
-        assertEquals(url, command.url(), "La URL debe coincidir.");
+        assertArrayEquals(photoData, command.photoData(), "El photoData debe coincidir.");
+        assertEquals(fileName, command.fileName(), "El fileName debe coincidir.");
+        assertEquals(contentType, command.contentType(), "El contentType debe coincidir.");
     }
 }

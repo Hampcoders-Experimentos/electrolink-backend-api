@@ -9,6 +9,7 @@ import com.hampcoders.electrolink.iam.domain.services.UserQueryService;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.logging.log4j.util.Strings;
+import org.springframework.stereotype.Service;
 
 /**
  * IamContextFacade.
@@ -20,6 +21,7 @@ import org.apache.logging.log4j.util.Strings;
  * </p>
  *
  */
+@Service
 public class IamContextFacade {
 
   private final UserCommandService userCommandService;

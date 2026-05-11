@@ -25,11 +25,8 @@ public class ServiceOperationResourceFromEntityAssemblerTest {
         OffsetDateTime completedAt = OffsetDateTime.parse("2025-10-05T12:30:00Z");
         ServiceStatus status = ServiceStatus.COMPLETED;
 
-        var requestIdVo = mock(RequestId.class);
-        when(requestIdVo.getId()).thenReturn(requestId);
-
-        var technicianIdVo = mock(TechnicianId.class);
-        when(technicianIdVo.getTechnicianId()).thenReturn(technicianId);
+        var requestIdVo = new RequestId(requestId);
+        var technicianIdVo = new TechnicianId(technicianId);
 
         ServiceOperation entity = mock(ServiceOperation.class);
         when(entity.getId()).thenReturn(serviceOperationId);
@@ -58,8 +55,6 @@ public class ServiceOperationResourceFromEntityAssemblerTest {
         verify(entity).getStartedAt();
         verify(entity).getCompletedAt();
         verify(entity).getCurrentStatus();
-        verify(requestIdVo).getId();
-        verify(technicianIdVo).getTechnicianId();
-        verifyNoMoreInteractions(entity, requestIdVo, technicianIdVo);
+        verifyNoMoreInteractions(entity);
     }
 }

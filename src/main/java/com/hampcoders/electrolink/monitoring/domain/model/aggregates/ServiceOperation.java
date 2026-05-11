@@ -1,5 +1,6 @@
 package com.hampcoders.electrolink.monitoring.domain.model.aggregates;
 
+import com.hampcoders.electrolink.monitoring.domain.model.events.ServiceCompletedEvent;
 import com.hampcoders.electrolink.monitoring.domain.model.valueobjects.RequestId;
 import com.hampcoders.electrolink.monitoring.domain.model.valueobjects.ServiceStatus;
 import com.hampcoders.electrolink.monitoring.domain.model.valueobjects.TechnicianId;
@@ -68,9 +69,7 @@ public class ServiceOperation extends AuditableAbstractAggregateRootNoId<Service
    * @param completedAt The time the operation was completed (can be null).
    * @param currentStatus The current status of the operation.
    */
-  public ServiceOperation(RequestId requestId, TechnicianId technicianId,
-                          OffsetDateTime startedAt, OffsetDateTime completedAt,
-                          ServiceStatus currentStatus) {
+  public ServiceOperation(RequestId requestId, TechnicianId technicianId, OffsetDateTime startedAt, OffsetDateTime completedAt, ServiceStatus currentStatus) {
     this.requestId = requestId;
     this.technicianId = technicianId;
     this.startedAt = startedAt;
@@ -80,6 +79,10 @@ public class ServiceOperation extends AuditableAbstractAggregateRootNoId<Service
 
   public void updateStatus(ServiceStatus status) {
     this.currentStatus = status;
+    if (status == ServiceStatus.COMPLETED) {
+      this.completedAt = OffsetDateTime.now();
+      registerEvent(new ServiceCompletedEvent(this.id, this.requestId.requestId(), this.technicianId.technicianId()));
+    }
   }
 
   public ServiceStatus getStatus() {

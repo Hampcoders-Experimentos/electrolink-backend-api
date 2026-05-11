@@ -58,7 +58,8 @@ public class RequestCommandServiceImplTest {
         "Air conditioner not cooling properly",
         LocalDate.of(2024, 10, 15),
         billResource,
-        List.of(photoResource)
+        List.of(photoResource),
+        false
     );
 
     var command = new CreateRequestCommand(resource);
@@ -105,7 +106,8 @@ public class RequestCommandServiceImplTest {
         "Electrical wiring issue",
         LocalDate.of(2024, 11, 1),
         billResource,
-        null
+        null,
+        false
     );
 
     var command = new CreateRequestCommand(resource);
@@ -145,7 +147,8 @@ public class RequestCommandServiceImplTest {
         "Old problem",
         LocalDate.of(2024, 9, 1),
         originalBill,
-        null
+        null,
+        false
     );
 
     Request existingRequest = new Request(
@@ -169,7 +172,8 @@ public class RequestCommandServiceImplTest {
         "Updated problem description",
         LocalDate.of(2024, 10, 20),
         updatedBill,
-        List.of(new PhotoResource("PHOTO-999", "https://example.com/updated-photo.jpg"))
+        List.of(new PhotoResource("PHOTO-999", "https://example.com/updated-photo.jpg")),
+        false
     );
 
     var command = new UpdateRequestCommand(requestId, updatedResource);
@@ -212,7 +216,8 @@ public class RequestCommandServiceImplTest {
         "Problem description",
         LocalDate.of(2024, 10, 15),
         billResource,
-        null
+        null,
+        false
     );
 
     var command = new UpdateRequestCommand(requestId, resource);

@@ -49,7 +49,10 @@ public class ServiceCommandServiceImpl implements ServiceCommandService {
         command.tags(),
         command.components()
     );
-    return serviceRepository.save(service).getId();
+    var saved = serviceRepository.save(service);
+    saved.registerCreatedEvent();
+    serviceRepository.save(saved);
+    return saved.getId();
   }
 
   /**

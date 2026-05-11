@@ -35,7 +35,7 @@ public class TechnicianInventoryResourceFromEntityAssembler {
    * @param stockEntity The ComponentStock entity.
    * @return The resulting ComponentStockResource.
    */
-  private static ComponentStockResource toStockResourceFromEntity(
+  public static ComponentStockResource toStockResourceFromEntity(
       final ComponentStock stockEntity) {
     return new ComponentStockResource(
         stockEntity.getId(),

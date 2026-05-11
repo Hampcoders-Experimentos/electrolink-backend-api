@@ -1,5 +1,6 @@
 package com.hampcoders.electrolink.monitoring.application.internal.commandservices;
 
+import com.hampcoders.electrolink.monitoring.application.internal.outboundservices.PhotoStorageService;
 import com.hampcoders.electrolink.monitoring.domain.model.aggregates.Report;
 import com.hampcoders.electrolink.monitoring.domain.model.aggregates.ServiceOperation;
 import com.hampcoders.electrolink.monitoring.domain.model.commands.AddPhotoCommand;
@@ -20,6 +21,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
@@ -31,6 +33,8 @@ public class ReportCommandServiceImplTest {
     private ServiceOperationRepository serviceOperationRepository;
     @Mock
     private EntityManager entityManager;
+    @Mock
+    private PhotoStorageService photoStorageService;
 
     @InjectMocks
     private ReportCommandServiceImpl reportCommandService;
@@ -131,7 +135,9 @@ public class ReportCommandServiceImplTest {
         Long reportId = 11L;
         var url = "https://example.com/photo.jpg";
 
-        var command = new AddPhotoCommand(reportId, url);
+        when(photoStorageService.storePhoto(any(byte[].class), anyString(), anyString())).thenReturn(url);
+
+        var command = new AddPhotoCommand(reportId, new byte[]{1, 2, 3}, "test.jpg", "image/jpeg");
 
         // Act
         var actualId = reportCommandService.handle(command);

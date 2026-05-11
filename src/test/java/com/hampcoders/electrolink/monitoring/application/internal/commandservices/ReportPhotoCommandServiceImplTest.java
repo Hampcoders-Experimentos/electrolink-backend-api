@@ -1,5 +1,6 @@
 package com.hampcoders.electrolink.monitoring.application.internal.commandservices;
 
+import com.hampcoders.electrolink.monitoring.application.internal.outboundservices.PhotoStorageService;
 import com.hampcoders.electrolink.monitoring.domain.model.aggregates.Report;
 import com.hampcoders.electrolink.monitoring.domain.model.commands.AddPhotoCommand;
 import com.hampcoders.electrolink.monitoring.domain.model.entities.ReportPhoto;
@@ -16,6 +17,7 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
@@ -25,6 +27,8 @@ public class ReportPhotoCommandServiceImplTest {
     private ReportPhotoRepository reportPhotoRepository;
     @Mock
     private ReportRepository reportRepository;
+    @Mock
+    private PhotoStorageService photoStorageService;
 
     @InjectMocks
     private ReportPhotoCommandServiceImpl reportPhotoCommandService;
@@ -37,9 +41,10 @@ public class ReportPhotoCommandServiceImplTest {
         var url = "https://example.com/photo.jpg";
 
         when(reportRepository.findById(eq(reportId))).thenReturn(Optional.of(mock(Report.class)));
+        when(photoStorageService.storePhoto(any(byte[].class), anyString(), anyString())).thenReturn(url);
         when(reportPhotoRepository.save(any(ReportPhoto.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-        var command = new AddPhotoCommand(reportId, url);
+        var command = new AddPhotoCommand(reportId, new byte[]{1, 2, 3}, "test.jpg", "image/jpeg");
 
         // Act
         var actualId = reportPhotoCommandService.handle(command);
@@ -61,7 +66,7 @@ public class ReportPhotoCommandServiceImplTest {
 
         when(reportRepository.findById(eq(reportId))).thenReturn(Optional.empty());
 
-        var command = new AddPhotoCommand(reportId, url);
+        var command = new AddPhotoCommand(reportId, new byte[]{1, 2, 3}, "test.jpg", "image/jpeg");
 
         // Act + Assert
         var ex = assertThrows(IllegalArgumentException.class, () -> {
