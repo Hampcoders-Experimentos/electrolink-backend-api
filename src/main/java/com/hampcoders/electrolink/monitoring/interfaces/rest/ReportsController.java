@@ -1,19 +1,21 @@
 package com.hampcoders.electrolink.monitoring.interfaces.rest;
 
-import com.hampcoders.electrolink.monitoring.application.internal.commandservices.ReportCommandServiceImpl;
-import com.hampcoders.electrolink.monitoring.application.internal.queryservices.ReportQueryServiceImpl;
 import com.hampcoders.electrolink.monitoring.domain.model.commands.DeleteReportCommand;
 import com.hampcoders.electrolink.monitoring.domain.model.queries.GetAllReportsQuery;
 import com.hampcoders.electrolink.monitoring.domain.model.queries.GetReportByIdQuery;
 import com.hampcoders.electrolink.monitoring.domain.model.queries.GetReportsByServiceOperationIdQuery;
+import com.hampcoders.electrolink.monitoring.domain.services.ReportCommandService;
+import com.hampcoders.electrolink.monitoring.domain.services.ReportQueryService;
 import com.hampcoders.electrolink.monitoring.interfaces.rest.resources.CreateReportResource;
 import com.hampcoders.electrolink.monitoring.interfaces.rest.resources.ReportResource;
 import com.hampcoders.electrolink.monitoring.interfaces.rest.transform.CreateReportCommandFromResourceAssembler;
 import com.hampcoders.electrolink.monitoring.interfaces.rest.transform.ReportResourceFromEntityAssembler;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -28,37 +30,32 @@ import org.springframework.web.server.ResponseStatusException;
  * REST controller for managing reports, providing endpoints for creation,
  * retrieval, and deletion of report entities.
  */
+@Tag(name = "Reports", description = "Report management endpoints")
 @RestController
-@RequestMapping("/api/v1/reports")
+@RequestMapping(value = "/api/v1/reports", produces = MediaType.APPLICATION_JSON_VALUE)
 public class ReportsController {
 
-  private final ReportCommandServiceImpl commandService;
-  private final ReportQueryServiceImpl queryService;
+  private final ReportCommandService commandService;
+  private final ReportQueryService queryService;
 
-  /**
-   * Constructs a ReportsController with the necessary command and query services.
-   *
-   * @param commandService The service for handling report commands (CUD).
-   * @param queryService The service for handling report queries (R).
-   */
-  public ReportsController(ReportCommandServiceImpl commandService,
-                           ReportQueryServiceImpl queryService) {
+  public ReportsController(ReportCommandService commandService,
+                           ReportQueryService queryService) {
     this.commandService = commandService;
     this.queryService = queryService;
   }
 
-  /**
-   * Creates a new report in the system.
-   *
-   * @param resource The data for the new report.
-   * @return The ID of the newly created report with HTTP status 201 (Created).
-   */
-  @Operation(summary = "Create a report")
   @PostMapping
-  public ResponseEntity<Long> createReport(@RequestBody CreateReportResource resource) {
+  public ResponseEntity<ReportResource> createReport(@RequestBody CreateReportResource resource) {
     var command = CreateReportCommandFromResourceAssembler.toCommandFromResource(resource);
     var reportId = commandService.handle(command);
-    return new ResponseEntity<>(reportId, HttpStatus.CREATED);
+
+    var getQuery = new GetReportByIdQuery(reportId);
+    var report = queryService.handle(getQuery)
+        .orElseThrow(() -> new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+            "Report not found after creation"));
+
+    return new ResponseEntity<>(ReportResourceFromEntityAssembler.toResourceFromEntity(report),
+        HttpStatus.CREATED);
   }
 
   /**

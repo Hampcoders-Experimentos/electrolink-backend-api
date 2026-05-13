@@ -1,5 +1,6 @@
 package com.hampcoders.electrolink.monitoring.domain.model.aggregates;
 
+import com.hampcoders.electrolink.monitoring.domain.model.commands.CreateServiceOperationCommand;
 import com.hampcoders.electrolink.monitoring.domain.model.events.ServiceCompletedEvent;
 import com.hampcoders.electrolink.monitoring.domain.model.valueobjects.RequestId;
 import com.hampcoders.electrolink.monitoring.domain.model.valueobjects.ServiceStatus;
@@ -16,7 +17,6 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import java.time.OffsetDateTime;
 import lombok.Getter;
-import lombok.Setter;
 
 /**
  * Represents a service operation performed by a technician in response to a request.
@@ -46,7 +46,6 @@ public class ServiceOperation extends AuditableAbstractAggregateRootNoId<Service
   @Column(nullable = false)
   private OffsetDateTime startedAt;
 
-  @Setter
   @Getter
   @Column
   private OffsetDateTime completedAt;
@@ -57,31 +56,25 @@ public class ServiceOperation extends AuditableAbstractAggregateRootNoId<Service
   private TechnicianId technicianId;
 
   public ServiceOperation() {
-    super();
   }
 
-  /**
-   * Constructs a new ServiceOperation aggregate.
-   *
-   * @param requestId The unique identifier for the request/operation.
-   * @param technicianId The ID of the technician responsible for the operation.
-   * @param startedAt The time the operation started.
-   * @param completedAt The time the operation was completed (can be null).
-   * @param currentStatus The current status of the operation.
-   */
-  public ServiceOperation(RequestId requestId, TechnicianId technicianId, OffsetDateTime startedAt, OffsetDateTime completedAt, ServiceStatus currentStatus) {
-    this.requestId = requestId;
-    this.technicianId = technicianId;
-    this.startedAt = startedAt;
-    this.completedAt = completedAt;
-    this.currentStatus = currentStatus;
+  public ServiceOperation(CreateServiceOperationCommand command) {
+    this.requestId = command.requestId();
+    this.technicianId = command.technicianId();
+    this.startedAt = command.startedAt();
+    this.completedAt = command.completedAt();
+    this.currentStatus = command.currentStatus();
   }
 
   public void updateStatus(ServiceStatus status) {
     this.currentStatus = status;
     if (status == ServiceStatus.COMPLETED) {
       this.completedAt = OffsetDateTime.now();
-      registerEvent(new ServiceCompletedEvent(this.id, this.requestId.requestId(), this.technicianId.technicianId()));
+      registerEvent(new ServiceCompletedEvent(
+          this.id,
+          this.requestId.requestId(),
+          this.technicianId.technicianId()
+      ));
     }
   }
 

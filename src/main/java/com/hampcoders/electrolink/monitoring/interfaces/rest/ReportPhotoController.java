@@ -1,22 +1,20 @@
 package com.hampcoders.electrolink.monitoring.interfaces.rest;
 
-import com.hampcoders.electrolink.monitoring.domain.model.entities.ReportPhoto;
 import com.hampcoders.electrolink.monitoring.domain.services.ReportPhotoCommandService;
 import com.hampcoders.electrolink.monitoring.interfaces.rest.resources.CreateReportPhotoResource;
 import com.hampcoders.electrolink.monitoring.interfaces.rest.transform.CreateReportPhotoCommandFromResourceAssembler;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import java.net.URI;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-/**
- * REST controller for managing {@link ReportPhoto} entities.
- * Provides endpoints for adding photos to reports.
- */
+@Tag(name = "Report Photos", description = "Photo management for reports")
 @RestController
-@RequestMapping("/api/v1/photos")
+@RequestMapping(value = "/api/v1/photos", produces = MediaType.APPLICATION_JSON_VALUE)
 public class ReportPhotoController {
 
   private final ReportPhotoCommandService photoCommandService;

@@ -27,4 +27,11 @@ public class SubscriptionQueryServiceImpl implements SubscriptionQueryService {
     public Optional<Subscription> handle(GetActiveSubscriptionByUserIdQuery query) {
         return subscriptionRepository.findByUserIdAndStatus(query.userId(), SubscriptionStatus.ACTIVE);
     }
+
+    @Override
+    public boolean canUserMakeRequest(Long userId) {
+        return subscriptionRepository.findByUserId(userId)
+            .map(Subscription::canMakeRequest)
+            .orElse(false);
+    }
 }

@@ -1,6 +1,7 @@
 package com.hampcoders.electrolink.subscription.domain.model.aggregates;
 
 import com.hampcoders.electrolink.shared.domain.model.aggregates.AuditableAbstractAggregateRoot;
+import com.hampcoders.electrolink.subscription.domain.model.commands.CreateSubscriptionCommand;
 import com.hampcoders.electrolink.subscription.domain.model.events.SubscriptionActivatedEvent;
 import com.hampcoders.electrolink.subscription.domain.model.events.SubscriptionCancelledEvent;
 import com.hampcoders.electrolink.subscription.domain.model.valueobjects.SubscriptionStatus;
@@ -45,14 +46,14 @@ public class Subscription extends AuditableAbstractAggregateRoot<Subscription> {
     @Column(nullable = false)
     private LocalDateTime monthlyRequestResetDate;
 
-    public Subscription(Long userId, Plan plan) {
-        this.userId = userId;
+    public Subscription(CreateSubscriptionCommand command, Plan plan) {
+        this.userId = command.userId();
         this.plan = plan;
         this.status = SubscriptionStatus.ACTIVE;
         this.startDate = LocalDateTime.now();
         this.monthlyRequestCount = 0;
         this.monthlyRequestResetDate = LocalDateTime.now().plusMonths(1);
-        registerEvent(new SubscriptionActivatedEvent(userId, plan.getId(), plan.getName()));
+        registerEvent(new SubscriptionActivatedEvent(command.userId(), plan.getId(), plan.getName()));
     }
 
     public boolean canMakeRequest() {

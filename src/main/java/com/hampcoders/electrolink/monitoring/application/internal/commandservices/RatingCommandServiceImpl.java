@@ -41,13 +41,7 @@ public class RatingCommandServiceImpl implements RatingCommandService {
           "Cannot add rating: associated ServiceOperation is not completed.");
     }
 
-    var rating = new Rating(
-        command.requestId(),
-        command.score(),
-        command.comment(),
-        command.raterId(),
-        command.technicianId()
-    );
+    var rating = new Rating(command);
 
     // Automatically set isFeatured based on score
     if (rating.getScore() == 5) {

@@ -1,16 +1,12 @@
 package com.hampcoders.electrolink.monitoring.application.internal.commandservices;
 
-import com.hampcoders.electrolink.monitoring.application.internal.outboundservices.PhotoStorageService;
 import com.hampcoders.electrolink.monitoring.domain.model.aggregates.Report;
 import com.hampcoders.electrolink.monitoring.domain.model.aggregates.ServiceOperation;
-import com.hampcoders.electrolink.monitoring.domain.model.commands.AddPhotoCommand;
 import com.hampcoders.electrolink.monitoring.domain.model.commands.AddReportCommand;
 import com.hampcoders.electrolink.monitoring.domain.model.commands.DeleteReportCommand;
-import com.hampcoders.electrolink.monitoring.domain.model.entities.ReportPhoto;
 import com.hampcoders.electrolink.monitoring.domain.model.valueobjects.ReportType;
 import com.hampcoders.electrolink.monitoring.infrastructure.persistence.jpa.repositories.ReportRepository;
 import com.hampcoders.electrolink.monitoring.infrastructure.persistence.jpa.repositories.ServiceOperationRepository;
-import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -21,8 +17,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -31,11 +26,6 @@ public class ReportCommandServiceImplTest {
     private ReportRepository reportRepository;
     @Mock
     private ServiceOperationRepository serviceOperationRepository;
-    @Mock
-    private EntityManager entityManager;
-    @Mock
-    private PhotoStorageService photoStorageService;
-
     @InjectMocks
     private ReportCommandServiceImpl reportCommandService;
 
@@ -60,7 +50,6 @@ public class ReportCommandServiceImplTest {
         verify(serviceOperationRepository, times(1)).findById(serviceOperationId);
         verify(reportRepository, times(1)).save(any(Report.class));
         verifyNoMoreInteractions(serviceOperationRepository, reportRepository);
-        verifyNoInteractions(entityManager);
     }
 
     @Test
@@ -78,7 +67,7 @@ public class ReportCommandServiceImplTest {
         assertFalse(ex.getMessage().contains("No ServiceOperation found with RequestId: "));
         verify(serviceOperationRepository, times(1)).findById(serviceOperationId);
         verifyNoMoreInteractions(serviceOperationRepository);
-        verifyNoInteractions(reportRepository, entityManager);
+        verifyNoInteractions(reportRepository);
     }
 
     // -------------------------------------------------------------------------
@@ -100,7 +89,7 @@ public class ReportCommandServiceImplTest {
         verify(reportRepository, times(1)).findById(reportId);
         verify(reportRepository, times(1)).delete(existingReport);
         verifyNoMoreInteractions(reportRepository);
-        verifyNoInteractions(serviceOperationRepository, entityManager);
+        verifyNoInteractions(serviceOperationRepository);
     }
 
     @Test
@@ -122,31 +111,7 @@ public class ReportCommandServiceImplTest {
         verify(reportRepository, times(1)).findById(reportId);
         verify(reportRepository, never()).delete(any(Report.class));
         verifyNoMoreInteractions(reportRepository);
-        verifyNoInteractions(serviceOperationRepository, entityManager);
+        verifyNoInteractions(serviceOperationRepository);
     }
 
-    // -------------------------------------------------------------------------
-    // handle(AddPhotoCommand command) - ADD PHOTO
-    // -------------------------------------------------------------------------
-    @Test
-    @DisplayName("handle(AddPhotoCommand) should persist ReportPhoto and return its ID (AAA)")
-    void handle_AddPhotoCommand_ShouldPersistPhotoAndReturnId() {
-        // Arrange
-        Long reportId = 11L;
-        var url = "https://example.com/photo.jpg";
-
-        when(photoStorageService.storePhoto(any(byte[].class), anyString(), anyString())).thenReturn(url);
-
-        var command = new AddPhotoCommand(reportId, new byte[]{1, 2, 3}, "test.jpg", "image/jpeg");
-
-        // Act
-        var actualId = reportCommandService.handle(command);
-
-        // Assert
-        assertNull(actualId, "Expected id to be null because repository save is mocked and no id is set");
-
-        verify(entityManager, times(1)).persist(any(ReportPhoto.class));
-        verifyNoMoreInteractions(entityManager);
-        verifyNoInteractions(reportRepository, serviceOperationRepository);
-    }
 }

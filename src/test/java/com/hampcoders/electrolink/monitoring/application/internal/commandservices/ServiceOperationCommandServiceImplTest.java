@@ -12,15 +12,12 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockedStatic;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.OffsetDateTime;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -85,40 +82,29 @@ public class ServiceOperationCommandServiceImplTest {
         verify(serviceOperationRepository, times(1)).findById(serviceOperationId);
         verify(serviceOperation, times(1)).updateStatus(ServiceStatus.PENDING);
         verify(serviceOperationRepository, times(1)).save(serviceOperation);
-        verify(serviceOperation, never()).setCompletedAt(any(OffsetDateTime.class));
         verifyNoMoreInteractions(serviceOperationRepository);
     }
 
     @Test
-    @DisplayName("handle(UpdateServiceStatusCommand) should update status to COMPLETED, set completedAt, and save (AAA)")
-    void handle_UpdateServiceStatusCommand_ShouldUpdateToCompleted_SetCompletedAt_AndSave() {
+    @DisplayName("handle(UpdateServiceStatusCommand) should update status to COMPLETED and save (AAA)")
+    void handle_UpdateServiceStatusCommand_ShouldUpdateToCompleted_AndSave() {
         // Arrange
         var serviceOperationId = 10L;
         var newStatus = ServiceStatus.COMPLETED.toString();
         var existingServiceOperation = mock(ServiceOperation.class);
 
-        var expectedNewStatus = ServiceStatus.valueOf(newStatus);
-        var fixedTime = OffsetDateTime.parse("2025-10-05T15:00:00Z");
-
-        when(serviceOperationRepository.findById(eq(serviceOperationId))).thenReturn(Optional.of(existingServiceOperation));
+        when(serviceOperationRepository.findById(serviceOperationId)).thenReturn(Optional.of(existingServiceOperation));
 
         var command = new UpdateServiceStatusCommand(serviceOperationId, newStatus);
 
-        // Act + Assert
-        try (MockedStatic<OffsetDateTime> mockedStatic = Mockito.mockStatic(OffsetDateTime.class)) {
+        // Act
+        serviceOperationCommandService.handle(command);
 
-            mockedStatic.when(OffsetDateTime::now).thenReturn(fixedTime);
-
-            // Act
-            serviceOperationCommandService.handle(command);
-
-            // Assert
-            verify(serviceOperationRepository, times(1)).findById(eq(serviceOperationId));
-            verify(existingServiceOperation, times(1)).updateStatus(eq(expectedNewStatus));
-            verify(existingServiceOperation, times(1)).setCompletedAt(eq(fixedTime));
-            verify(serviceOperationRepository, times(1)).save(eq(existingServiceOperation));
-            verifyNoMoreInteractions(serviceOperationRepository);
-        }
+        // Assert
+        verify(serviceOperationRepository).findById(serviceOperationId);
+        verify(existingServiceOperation).updateStatus(ServiceStatus.COMPLETED);
+        verify(serviceOperationRepository).save(existingServiceOperation);
+        verifyNoMoreInteractions(serviceOperationRepository);
     }
 
     @Test

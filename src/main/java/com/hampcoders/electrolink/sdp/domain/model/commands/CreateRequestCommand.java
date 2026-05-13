@@ -1,12 +1,18 @@
 package com.hampcoders.electrolink.sdp.domain.model.commands;
 
-import com.hampcoders.electrolink.sdp.interfaces.rest.resources.CreateRequestResource;
+import com.hampcoders.electrolink.sdp.domain.model.entities.Bill;
+import com.hampcoders.electrolink.sdp.domain.model.entities.Photo;
+import java.time.LocalDate;
+import java.util.List;
 
-/**
- * Command to create a new service request.
- *
- * @param resource The resource containing the data for the new request.
- */
-public record CreateRequestCommand(CreateRequestResource resource) {
-
-}
+public record CreateRequestCommand(
+    String clientId,
+    String technicianId,
+    String propertyId,
+    String serviceId,
+    String problemDescription,
+    LocalDate scheduledDate,
+    Bill bill,
+    List<Photo> photos,
+    boolean isPriority
+) {}

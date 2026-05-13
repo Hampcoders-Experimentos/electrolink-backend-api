@@ -8,4 +8,5 @@ import java.util.Optional;
 public interface SubscriptionQueryService {
     Optional<Subscription> handle(GetSubscriptionByUserIdQuery query);
     Optional<Subscription> handle(GetActiveSubscriptionByUserIdQuery query);
+    boolean canUserMakeRequest(Long userId);
 }

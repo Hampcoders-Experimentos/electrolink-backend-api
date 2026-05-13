@@ -1,5 +1,6 @@
 package com.hampcoders.electrolink.monitoring.domain.model.entities;
 
+import com.hampcoders.electrolink.shared.domain.model.entities.AuditableModel;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -8,13 +9,9 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import lombok.Getter;
 
-/**
- * Represents a photo associated with a specific Report.
- * This is an entity owned by the Report Aggregate.
- */
 @Entity
 @Table
-public class ReportPhoto {
+public class ReportPhoto extends AuditableModel {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -36,6 +33,5 @@ public class ReportPhoto {
   }
 
   protected ReportPhoto() {
-    // Required by JPA
   }
 }

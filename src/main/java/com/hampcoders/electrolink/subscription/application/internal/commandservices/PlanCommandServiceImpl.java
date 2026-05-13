@@ -2,13 +2,9 @@ package com.hampcoders.electrolink.subscription.application.internal.commandserv
 
 import com.hampcoders.electrolink.subscription.domain.model.aggregates.Plan;
 import com.hampcoders.electrolink.subscription.domain.model.commands.CreatePlanCommand;
-import com.hampcoders.electrolink.subscription.domain.model.valueobjects.Money;
-import com.hampcoders.electrolink.subscription.domain.model.valueobjects.PlanType;
 import com.hampcoders.electrolink.subscription.domain.services.PlanCommandService;
 import com.hampcoders.electrolink.subscription.infrastructure.persistence.jpa.repositories.PlanRepository;
 import jakarta.transaction.Transactional;
-import java.util.Currency;
-import java.util.Optional;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -23,29 +19,7 @@ public class PlanCommandServiceImpl implements PlanCommandService {
     @Override
     @Transactional
     public Plan handle(CreatePlanCommand command) {
-        var plan = new Plan(
-            command.name(),
-            command.description(),
-            new Money(java.math.BigDecimal.valueOf(command.price()), Currency.getInstance("USD")),
-            command.maxRequestsPerMonth(),
-            command.prioritySupport()
-        );
+        var plan = new Plan(command);
         return planRepository.save(plan);
-    }
-
-    @Override
-    @Transactional
-    public void seedDefaultPlans() {
-        if (!planRepository.existsByName(PlanType.BASIC)) {
-            planRepository.save(Plan.createBasicPlan());
-        }
-        if (!planRepository.existsByName(PlanType.PREMIUM)) {
-            planRepository.save(Plan.createPremiumPlan());
-        }
-    }
-
-    @Override
-    public Optional<Plan> findById(Long planId) {
-        return planRepository.findById(planId);
     }
 }

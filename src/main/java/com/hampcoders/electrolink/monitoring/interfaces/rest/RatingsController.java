@@ -1,13 +1,13 @@
 package com.hampcoders.electrolink.monitoring.interfaces.rest;
 
-import com.hampcoders.electrolink.monitoring.application.internal.commandservices.RatingCommandServiceImpl;
-import com.hampcoders.electrolink.monitoring.application.internal.queryservices.RatingQueryServiceImpl;
 import com.hampcoders.electrolink.monitoring.domain.model.commands.DeleteRatingCommand;
 import com.hampcoders.electrolink.monitoring.domain.model.queries.GetAllRatingsQuery;
 import com.hampcoders.electrolink.monitoring.domain.model.queries.GetRatingByIdQuery;
 import com.hampcoders.electrolink.monitoring.domain.model.queries.GetRatingsByRequestIdQuery;
 import com.hampcoders.electrolink.monitoring.domain.model.queries.GetRatingsByTechnicianIdQuery;
 import com.hampcoders.electrolink.monitoring.domain.model.queries.GetFeaturedRatingsByTechnicianIdQuery;
+import com.hampcoders.electrolink.monitoring.domain.services.RatingCommandService;
+import com.hampcoders.electrolink.monitoring.domain.services.RatingQueryService;
 import com.hampcoders.electrolink.monitoring.interfaces.rest.resources.CreateRatingResource;
 import com.hampcoders.electrolink.monitoring.interfaces.rest.resources.RatingResource;
 import com.hampcoders.electrolink.monitoring.interfaces.rest.resources.UpdateRatingResource;
@@ -42,36 +42,27 @@ import org.springframework.web.server.ResponseStatusException;
 @RequestMapping("/api/v1/ratings")
 public class RatingsController {
 
-  private final RatingCommandServiceImpl commandService;
-  private final RatingQueryServiceImpl queryService;
+  private final RatingCommandService commandService;
+  private final RatingQueryService queryService;
 
-  /**
-   * Constructs a RatingsController with the necessary command and query services.
-   *
-   * @param commandService The service for handling rating commands (CUD).
-   * @param queryService The service for handling rating queries (R).
-   */
-  public RatingsController(RatingCommandServiceImpl commandService,
-                           RatingQueryServiceImpl queryService) {
+  public RatingsController(RatingCommandService commandService,
+                           RatingQueryService queryService) {
     this.commandService = commandService;
     this.queryService = queryService;
   }
 
-  /**
-   * Creates a new rating in the system.
-   *
-   * @param resource The data for the new rating.
-   * @return The ID of the newly created rating with HTTP status 201 (Created).
-   */
-  @Operation(summary = "Create a new rating", responses = {
-      @ApiResponse(responseCode = "201", description = "Rating created successfully"),
-      @ApiResponse(responseCode = "400", description = "Invalid input", content = @Content)
-  })
   @PostMapping
-  public ResponseEntity<Long> createRating(@RequestBody CreateRatingResource resource) {
+  public ResponseEntity<RatingResource> createRating(@RequestBody CreateRatingResource resource) {
     var command = CreateRatingCommandFromResourceAssembler.toCommandFromResource(resource);
     var ratingId = commandService.handle(command);
-    return new ResponseEntity<>(ratingId, HttpStatus.CREATED);
+
+    var getQuery = new GetRatingByIdQuery(ratingId);
+    var rating = queryService.handle(getQuery)
+        .orElseThrow(() -> new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+            "Rating not found after creation"));
+
+    return new ResponseEntity<>(RatingResourceFromEntityAssembler.toResourceFromEntity(rating),
+        HttpStatus.CREATED);
   }
 
   /**

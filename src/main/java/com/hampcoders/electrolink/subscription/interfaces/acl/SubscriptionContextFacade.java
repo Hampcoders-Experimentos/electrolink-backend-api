@@ -3,6 +3,7 @@ package com.hampcoders.electrolink.subscription.interfaces.acl;
 import com.hampcoders.electrolink.subscription.domain.model.aggregates.Subscription;
 import com.hampcoders.electrolink.subscription.domain.model.commands.CancelSubscriptionCommand;
 import com.hampcoders.electrolink.subscription.domain.model.commands.CreateSubscriptionCommand;
+import com.hampcoders.electrolink.subscription.domain.model.commands.RecordRequestCommand;
 import com.hampcoders.electrolink.subscription.domain.model.commands.UpgradeSubscriptionCommand;
 import com.hampcoders.electrolink.subscription.domain.model.queries.GetActiveSubscriptionByUserIdQuery;
 import com.hampcoders.electrolink.subscription.domain.model.queries.GetSubscriptionByUserIdQuery;
@@ -37,11 +38,11 @@ public class SubscriptionContextFacade {
     }
 
     public boolean canUserMakeRequest(Long userId) {
-        return subscriptionCommandService.canUserMakeRequest(userId);
+        return subscriptionQueryService.canUserMakeRequest(userId);
     }
 
     public void recordRequest(Long userId) {
-        subscriptionCommandService.recordRequest(userId);
+        subscriptionCommandService.handle(new RecordRequestCommand(userId));
     }
 
     public Optional<Subscription> getActiveSubscription(Long userId) {

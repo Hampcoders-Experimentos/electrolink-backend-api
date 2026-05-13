@@ -1,0 +1,88 @@
+# Resumen de Sistema ElectroLink (Versión Final)
+
+## 1. Bounded Contexts
+
+| Bounded Context | Usuario Principal | Descripción Detallada | Funcionalidades Clave |
+|---|---|---|---|
+| **Identity and Access Management** | Ambos | Gestiona la identidad digital, autenticación y autorización de usuarios. Controla el acceso seguro al sistema con roles diferenciados y determina qué funciones puede acceder cada usuario según su rol y estado de suscripción. | • Registro diferenciado (Propietario/Técnico)<br>• Login seguro con autenticación<br>• Recuperación de contraseña<br>• Control de acceso por rol y suscripción |
+| **Subscription and Payments** | Ambos | Administra los planes de suscripción y pagos tanto para técnicos como para propietarios. Gestiona diferentes niveles de servicio (Básico/Gratis, Premium) con sus respectivos límites y beneficios. Procesa pagos recurrentes, maneja fallos de pago y actualiza el estado de las suscripciones. | • Planes de suscripción por niveles para ambos roles<br>• Procesamiento de pagos automatizado<br>• Gestión de límites de uso para planes gratuitos<br>• Facturación y portal de cliente (vía Stripe) |
+| **Profiles and Preferences** | Ambos | Permite configurar perfiles completos y preferencias personalizadas. Para técnicos: certificaciones, especialidades, y la zona de cobertura geográfica. Para propietarios: información personal y preferencias. | • Propietarios: Info personal, preferencias<br>• Técnicos: Certificaciones, especialidades, zona de cobertura<br>• Portfolio de trabajos realizados |
+| **Service Design and Planning** | Técnico + Propietario | Orquesta el catálogo de servicios y el proceso de solicitud. Los técnicos crean un catálogo de servicios con "recetas" de componentes. Los propietarios inician un asistente guiado donde el sistema primero valida los permisos de su plan de suscripción antes de permitir la selección de un servicio. | • Asistente de solicitud guiado con validación de plan<br>• Catálogo de servicios con recetas de componentes<br>• Carga de datos de recibos para análisis de consumo<br>• Opción de solicitud prioritaria para planes Premium<br>• Asignación automática de técnico sin intervención manual |
+| **Service Operation and Monitoring** | Técnico + Propietario | Supervisa la ejecución en tiempo real de servicios programados. Controla estados del servicio, registra trabajos con fotografías y reportes, y gestiona la evaluación mutua. | • Seguimiento de estados del servicio en tiempo real<br>• Registro fotográfico de trabajos (antes/después)<br>• Reportes técnicos estructurados<br>• Sistema de evaluación mutua post-servicio |
+| **Analytics** | Ambos | Provee visualizaciones e insights basados en datos de consumo y servicios. Para propietarios, analiza el consumo histórico. Para técnicos, ofrece métricas de desempeño. | • Propietarios: Dashboard de consumo, alertas por umbrales<br>• Técnicos: Métricas de desempeño, ingresos y rentabilidad<br>• Visualizaciones interactivas y exportables |
+| **Assets and Resource Management** | Ambos (Diferenciado) | Gestiona recursos físicos. Para técnicos: el inventario de componentes. Para propietarios: sus propiedades con ubicaciones geográficas exactas. | • Técnicos: Inventario de componentes, stock y alertas<br>• Propietarios: Propiedades con geolocalización<br>• Historial de mantenimientos por asset |
+
+## 2. Flujo Principal Actualizado del Sistema
+
+### 1. Registro y Configuración Inicial
+
+El usuario se registra como **Propietario** o **Técnico**. Completa su perfil y registra sus recursos. Por defecto, el Propietario inicia en el Plan Básico (Gratis) y el Técnico debe elegir un plan para activar su catálogo.
+
+### 2. Configuración de Servicios (Solo Técnicos)
+
+Tras suscribirse, el técnico crea su catálogo de servicios con "recetas" de componentes y configura su disponibilidad (horarios, bloqueos).
+
+### 3. Solicitud de Servicio (Propietarios) - Flujo Actualizado con Planes
+
+El proceso es un asistente guiado que ahora incluye la lógica de planes:
+
+- **Verificación de Plan**: Antes de iniciar, el sistema valida el plan del propietario
+  - Si es Básico (Gratis), verifica si ha alcanzado su límite de 2 solicitudes mensuales. Si lo alcanzó, se le muestra una oferta para actualizar a Premium
+  - Si es Premium, continúa sin límites
+- **Selección de Propiedad y Servicio**: Elige la propiedad y el servicio específico del catálogo disponible en su zona
+- **Añadir Detalles**:
+  - Añade una descripción opcional del problema
+  - Ingresa los datos de su último recibo eléctrico
+  - Si es Premium, verá y podrá activar la opción "Marcar como solicitud prioritaria"
+- **Confirmación**: El propietario confirma la solicitud
+
+### 4. Asignación Automática del Técnico (Sistema)
+
+El sistema ejecuta su lógica de cruces (geografía, stock, agenda) con una modificación clave:
+
+#### Proceso de Asignación:
+- El sistema primero procesa las solicitudes marcadas como "prioritarias" y luego las solicitudes normales en orden de llegada
+- Asigna el servicio al primer técnico que cumple todos los criterios, sin intervención manual
+
+### 5. Notificación y Ejecución del Servicio
+
+El técnico es notificado y ve su agenda actualizada. El servicio se ejecuta con seguimiento en tiempo real. Al finalizar, el stock se descuenta automáticamente.
+
+### 6. Post-Servicio y Análisis Continuo
+
+Se activa la evaluación mutua y se generan alertas de stock si es necesario. Los datos actualizan los dashboards de Analytics.
+
+## 3. Eventos Clave del Dominio Actualizados
+
+| Evento | Descripción |
+|---|---|
+| **Usuario Registrado** | Se dispara cuando un nuevo usuario completa su registro. |
+| **Suscripción Activada** | Ocurre cuando un usuario (técnico o propietario) completa exitosamente el pago de su plan Premium. |
+| **Límite de Solicitudes Alcanzado** | Un propietario en plan gratuito intenta crear una solicitud excediendo su límite mensual. Dispara la oferta de mejora de plan. |
+| **Servicio Catalogado** | El técnico crea o actualiza un servicio específico en su catálogo. |
+| **Solicitud Creada** | El propietario confirma el asistente de solicitud. El evento ahora incluye una bandera `is_priority`. |
+| **Servicio Asignado Automáticamente** | El sistema encuentra un técnico compatible y le asigna el trabajo. |
+| **Servicio Completado** | El técnico marca el trabajo como finalizado. Inicia la actualización de inventario y evaluaciones. |
+| **Pago Procesado** | Confirma que el pago recurrente de una suscripción fue exitoso. |
+
+## 4. Integraciones Clave Entre Bounded Contexts
+
+### Subscription and Payments → Service Design
+- **Propósito**: Controlar el acceso a funcionalidades premium
+- **Flujo**: Al iniciar el asistente de solicitud, Service Design debe consultar a Subscription and Payments para verificar el plan actual del propietario, su límite de uso y si tiene derecho a crear solicitudes prioritarias
+
+### Assets → Service Design
+- **Propósito**: Iniciar la búsqueda de servicios
+- **Flujo**: Service Design solicita la ubicación de la propiedad a Assets
+
+### Profiles → Service Design
+- **Propósito**: Filtrar técnicos por ubicación
+- **Flujo**: Service Design compara la ubicación de la propiedad con la zona de cobertura del perfil del técnico
+
+### Service Design → Assets
+- **Propósito**: Validar la capacidad de un técnico
+- **Flujo**: Service Design consulta el inventario del técnico en Assets para la verificación de stock
+
+### Service Operation → Assets
+- **Propósito**: Mantener el inventario actualizado
+- **Flujo**: Service Operation publica el evento Servicio Completado y Assets lo escucha para descontar el stock

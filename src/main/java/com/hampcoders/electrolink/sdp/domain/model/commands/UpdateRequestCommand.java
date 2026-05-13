@@ -1,14 +1,19 @@
 package com.hampcoders.electrolink.sdp.domain.model.commands;
 
-import com.hampcoders.electrolink.sdp.interfaces.rest.resources.CreateRequestResource;
+import com.hampcoders.electrolink.sdp.domain.model.entities.Bill;
+import com.hampcoders.electrolink.sdp.domain.model.entities.Photo;
+import java.time.LocalDate;
+import java.util.List;
 
-/**
- * Command to update an existing service request.
- *
- * @param requestId The ID of the request to update.
- *
- * @param resource  The resource containing the updated data.
- *
- */
-public record UpdateRequestCommand(Long requestId, CreateRequestResource resource) {
-}
+public record UpdateRequestCommand(
+    Long requestId,
+    String clientId,
+    String technicianId,
+    String propertyId,
+    String serviceId,
+    String problemDescription,
+    LocalDate scheduledDate,
+    Bill bill,
+    List<Photo> photos,
+    boolean isPriority
+) {}

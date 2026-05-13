@@ -1,5 +1,6 @@
 package com.hampcoders.electrolink.monitoring.domain.model.aggregates;
 
+import com.hampcoders.electrolink.monitoring.domain.model.commands.AddRatingCommand;
 import com.hampcoders.electrolink.monitoring.domain.model.valueobjects.RequestId;
 import com.hampcoders.electrolink.monitoring.domain.model.valueobjects.TechnicianId;
 import com.hampcoders.electrolink.shared.domain.model.aggregates.AuditableAbstractAggregateRootNoId;
@@ -63,26 +64,15 @@ public class Rating extends AuditableAbstractAggregateRootNoId<Rating> {
   private Boolean isFeatured = false;
 
   protected Rating() {
-    // Required by JPA
   }
 
-  /**
-   * Constructs a new Rating aggregate.
-   *
-   * @param requestId The ID of the service operation being rated.
-   * @param score The rating score (1 to 5).
-   * @param comment The optional comment.
-   * @param raterId The ID of the user providing the rating.
-   * @param technicianId The ID of the technician who performed the service.
-   */
-  public Rating(RequestId requestId, Integer score, String comment,
-                String raterId, TechnicianId technicianId) {
-    this.requestId = requestId;
-    this.score = score;
-    this.comment = comment;
-    this.raterId = raterId;
-    this.technicianId = technicianId;
-    this.isFeatured = false; // Default to not featured
+  public Rating(AddRatingCommand command) {
+    this.requestId = command.requestId();
+    this.score = command.score();
+    this.comment = command.comment();
+    this.raterId = command.raterId();
+    this.technicianId = command.technicianId();
+    this.isFeatured = false;
   }
 
   public void updateScore(int score) {

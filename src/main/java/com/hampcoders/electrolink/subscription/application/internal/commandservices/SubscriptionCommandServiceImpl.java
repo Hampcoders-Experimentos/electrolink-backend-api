@@ -3,6 +3,7 @@ package com.hampcoders.electrolink.subscription.application.internal.commandserv
 import com.hampcoders.electrolink.subscription.domain.model.aggregates.Subscription;
 import com.hampcoders.electrolink.subscription.domain.model.commands.CancelSubscriptionCommand;
 import com.hampcoders.electrolink.subscription.domain.model.commands.CreateSubscriptionCommand;
+import com.hampcoders.electrolink.subscription.domain.model.commands.RecordRequestCommand;
 import com.hampcoders.electrolink.subscription.domain.model.commands.UpgradeSubscriptionCommand;
 import com.hampcoders.electrolink.subscription.domain.services.SubscriptionCommandService;
 import com.hampcoders.electrolink.subscription.infrastructure.persistence.jpa.repositories.PlanRepository;
@@ -35,7 +36,7 @@ public class SubscriptionCommandServiceImpl implements SubscriptionCommandServic
             return subscriptionRepository.save(sub);
         }
 
-        var subscription = new Subscription(command.userId(), plan);
+        var subscription = new Subscription(command, plan);
         return subscriptionRepository.save(subscription);
     }
 
@@ -63,17 +64,11 @@ public class SubscriptionCommandServiceImpl implements SubscriptionCommandServic
     }
 
     @Override
-    public boolean canUserMakeRequest(Long userId) {
-        return subscriptionRepository.findByUserId(userId)
-            .map(Subscription::canMakeRequest)
-            .orElse(false);
-    }
-
-    @Override
     @Transactional
-    public Subscription recordRequest(Long userId) {
-        var subscription = subscriptionRepository.findByUserId(userId)
-            .orElseThrow(() -> new IllegalArgumentException("No subscription found for user: " + userId));
+    public Subscription handle(RecordRequestCommand command) {
+        var subscription = subscriptionRepository.findByUserId(command.userId())
+            .orElseThrow(() -> new IllegalArgumentException(
+                "No subscription found for user: " + command.userId()));
         subscription.recordRequest();
         return subscriptionRepository.save(subscription);
     }

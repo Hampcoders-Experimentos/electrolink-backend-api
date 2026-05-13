@@ -1,23 +1,25 @@
 package com.hampcoders.electrolink.monitoring.interfaces.rest;
 
-import com.hampcoders.electrolink.monitoring.application.internal.commandservices.ServiceOperationCommandServiceImpl;
-import com.hampcoders.electrolink.monitoring.application.internal.queryservices.ServiceOperationQueryServiceImpl;
-import com.hampcoders.electrolink.monitoring.domain.model.commands.UpdateServiceStatusCommand;
 import com.hampcoders.electrolink.monitoring.domain.model.queries.GetAllServiceOperationsQuery;
 import com.hampcoders.electrolink.monitoring.domain.model.queries.GetServiceOperationByIdQuery;
 import com.hampcoders.electrolink.monitoring.domain.model.queries.GetServiceOperationsByTechnicianIdQuery;
+import com.hampcoders.electrolink.monitoring.domain.services.ServiceOperationCommandService;
+import com.hampcoders.electrolink.monitoring.domain.services.ServiceOperationQueryService;
 import com.hampcoders.electrolink.monitoring.interfaces.rest.resources.CreateServiceOperationResource;
 import com.hampcoders.electrolink.monitoring.interfaces.rest.resources.ServiceOperationResource;
 import com.hampcoders.electrolink.monitoring.interfaces.rest.resources.UpdateServiceStatusResource;
 import com.hampcoders.electrolink.monitoring.interfaces.rest.transform.CreateServiceOperationCommandFromResourceAssembler;
 import com.hampcoders.electrolink.monitoring.interfaces.rest.transform.ServiceOperationResourceFromEntityAssembler;
+import com.hampcoders.electrolink.monitoring.interfaces.rest.transform.UpdateServiceStatusCommandFromResourceAssembler;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.util.List;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -32,21 +34,16 @@ import org.springframework.web.server.ResponseStatusException;
  * REST controller for managing service operations, providing endpoints for
  * creation and retrieval.
  */
+@Tag(name = "Service Operations", description = "Service operation management endpoints")
 @RestController
-@RequestMapping("/api/v1/service-operations")
+@RequestMapping(value = "/api/v1/service-operations", produces = MediaType.APPLICATION_JSON_VALUE)
 public class ServiceOperationsController {
 
-  private final ServiceOperationCommandServiceImpl commandService;
-  private final ServiceOperationQueryServiceImpl queryService;
+  private final ServiceOperationCommandService commandService;
+  private final ServiceOperationQueryService queryService;
 
-  /**
-   * Constructs a ServiceOperationsController with the necessary command and query services.
-   *
-   * @param commandService The service for handling service operation commands (CUD).
-   * @param queryService The service for handling service operation queries (R).
-   */
-  public ServiceOperationsController(ServiceOperationCommandServiceImpl commandService,
-                                     ServiceOperationQueryServiceImpl queryService) {
+  public ServiceOperationsController(ServiceOperationCommandService commandService,
+                                     ServiceOperationQueryService queryService) {
     this.commandService = commandService;
     this.queryService = queryService;
   }
@@ -142,8 +139,7 @@ public class ServiceOperationsController {
   public ResponseEntity<Void> updateStatus(
       @Valid @RequestBody UpdateServiceStatusResource resource) {
 
-    var command = new UpdateServiceStatusCommand(
-        resource.serviceOperationId(), resource.newStatus());
+    var command = UpdateServiceStatusCommandFromResourceAssembler.toCommandFromResource(resource);
     commandService.handle(command);
     return ResponseEntity.noContent().build();
   }

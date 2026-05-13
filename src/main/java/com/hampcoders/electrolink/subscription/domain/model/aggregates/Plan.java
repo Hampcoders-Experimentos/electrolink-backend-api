@@ -1,6 +1,7 @@
 package com.hampcoders.electrolink.subscription.domain.model.aggregates;
 
 import com.hampcoders.electrolink.shared.domain.model.aggregates.AuditableAbstractAggregateRoot;
+import com.hampcoders.electrolink.subscription.domain.model.commands.CreatePlanCommand;
 import com.hampcoders.electrolink.subscription.domain.model.valueobjects.Money;
 import com.hampcoders.electrolink.subscription.domain.model.valueobjects.PlanType;
 import jakarta.persistence.Column;
@@ -37,13 +38,12 @@ public class Plan extends AuditableAbstractAggregateRoot<Plan> {
     @Column(nullable = false)
     private boolean isActive;
 
-    public Plan(PlanType name, String description, Money price,
-                int maxRequestsPerMonth, boolean prioritySupport) {
-        this.name = name;
-        this.description = description;
-        this.price = price;
-        this.maxRequestsPerMonth = maxRequestsPerMonth;
-        this.prioritySupport = prioritySupport;
+    public Plan(CreatePlanCommand command) {
+        this.name = command.name();
+        this.description = command.description();
+        this.price = Money.usd(command.price());
+        this.maxRequestsPerMonth = command.maxRequestsPerMonth();
+        this.prioritySupport = command.prioritySupport();
         this.isActive = true;
     }
 
@@ -68,22 +68,15 @@ public class Plan extends AuditableAbstractAggregateRoot<Plan> {
     }
 
     public static Plan createBasicPlan() {
-        return new Plan(
-            PlanType.BASIC,
-            "Free plan with limited monthly requests",
-            Money.usd(0),
-            2,
-            false
-        );
+        return new Plan(new CreatePlanCommand(
+            PlanType.BASIC, "Free plan with limited monthly requests", 0, 2, false
+        ));
     }
 
     public static Plan createPremiumPlan() {
-        return new Plan(
-            PlanType.PREMIUM,
-            "Unlimited requests with priority support",
-            Money.usd(29.99),
-            Integer.MAX_VALUE,
-            true
-        );
+        return new Plan(new CreatePlanCommand(
+            PlanType.PREMIUM, "Unlimited requests with priority support",
+            29.99, Integer.MAX_VALUE, true
+        ));
     }
 }

@@ -1,5 +1,7 @@
 package com.hampcoders.electrolink.sdp.domain.model.aggregates;
 
+import com.hampcoders.electrolink.sdp.domain.model.commands.CreateServiceCommand;
+import com.hampcoders.electrolink.sdp.domain.model.commands.UpdateServiceCommand;
 import com.hampcoders.electrolink.sdp.domain.model.entities.ComponentQuantity;
 import com.hampcoders.electrolink.sdp.domain.model.entities.Tag;
 import com.hampcoders.electrolink.sdp.domain.model.events.ServiceCataloguedEvent;
@@ -14,14 +16,12 @@ import jakarta.persistence.OneToMany;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 
 /**
  * Represents a service offered by the platform as an aggregate root.
  */
 @Entity
 @Getter
-@NoArgsConstructor
 public class ServiceEntity extends AuditableAbstractAggregateRoot<ServiceEntity> {
 
   private String name;
@@ -46,68 +46,41 @@ public class ServiceEntity extends AuditableAbstractAggregateRoot<ServiceEntity>
   @JoinColumn(name = "service_id")
   private List<ComponentQuantity> components = new ArrayList<>();
 
-  /**
-   * Constructs a new ServiceEntity.
-   *
-   * @param name          The name of the service.
-   *
-   * @param description   A description of the service.
-   *
-   * @param basePrice     The base price of the service.
-   *
-   * @param estimatedTime The estimated time to complete the service.
-   *
-   * @param category      The category of the service.
-   *
-   * @param isVisible     Whether the service is visible to clients.
-   *
-   * @param createdBy     The ID of the user who created the service.
-   *
-   * @param policy        The service's policy.
-   *
-   * @param restriction   The service's restrictions.
-   *
-   * @param tags          A list of tags associated with the service.
-   *
-   * @param components    A list of components required for the service.
-   *
-   */
-  public ServiceEntity(String name, String description, Double basePrice,
-                       String estimatedTime, String category,
-                       boolean isVisible, String createdBy, Policy policy, Restriction restriction,
-                       List<Tag> tags, List<ComponentQuantity> components) {
-    this.name = name;
-    this.description = description;
-    this.basePrice = basePrice;
-    this.estimatedTime = estimatedTime;
-    this.category = category;
-    this.isVisible = isVisible;
-    this.createdBy = createdBy;
-    this.policy = policy;
-    this.restriction = restriction;
-    this.tags = tags != null ? tags : new ArrayList<>();
-    this.components = components != null ? components : new ArrayList<>();
+  protected ServiceEntity() {
   }
 
-  /**
-   * Updates the service's data from another ServiceEntity instance.
-   *
-   * @param updated The ServiceEntity instance with the new data.
-   *
-   */
-  public void updateFrom(ServiceEntity updated) {
-    this.name = updated.name;
-    this.description = updated.description;
-    this.basePrice = updated.basePrice;
-    this.estimatedTime = updated.estimatedTime;
-    this.category = updated.category;
-    this.isVisible = updated.isVisible;
-    this.policy = updated.policy;
-    this.restriction = updated.restriction;
+  public ServiceEntity(final CreateServiceCommand command) {
+    this.name = command.name();
+    this.description = command.description();
+    this.basePrice = command.price();
+    this.estimatedTime = command.estimatedTime();
+    this.category = command.category();
+    this.isVisible = command.isVisible();
+    this.createdBy = command.createdBy();
+    this.policy = command.policy();
+    this.restriction = command.restriction();
+    this.tags = command.tags() != null ? new ArrayList<>(command.tags()) : new ArrayList<>();
+    this.components = command.components() != null ? new ArrayList<>(command.components()) : new ArrayList<>();
+  }
+
+  public void updateFrom(final UpdateServiceCommand command) {
+    this.name = command.name();
+    this.description = command.description();
+    this.basePrice = command.price();
+    this.estimatedTime = command.estimatedTime();
+    this.category = command.category();
+    this.isVisible = command.isVisible();
+    this.createdBy = command.createdBy();
+    this.policy = command.policy();
+    this.restriction = command.restriction();
     this.tags.clear();
-    this.tags.addAll(updated.tags);
+    if (command.tags() != null) {
+      this.tags.addAll(command.tags());
+    }
     this.components.clear();
-    this.components.addAll(updated.components);
+    if (command.components() != null) {
+      this.components.addAll(command.components());
+    }
   }
 
   public void registerCreatedEvent() {

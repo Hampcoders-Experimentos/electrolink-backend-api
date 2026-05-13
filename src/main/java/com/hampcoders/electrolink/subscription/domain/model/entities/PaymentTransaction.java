@@ -1,6 +1,7 @@
 package com.hampcoders.electrolink.subscription.domain.model.entities;
 
 import com.hampcoders.electrolink.shared.domain.model.entities.AuditableModel;
+import com.hampcoders.electrolink.subscription.domain.model.commands.RecordPaymentCommand;
 import com.hampcoders.electrolink.subscription.domain.model.valueobjects.Money;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
@@ -41,13 +42,12 @@ public class PaymentTransaction extends AuditableModel {
     @Column(nullable = false)
     private LocalDateTime paidAt;
 
-    public PaymentTransaction(Long subscriptionId, Long userId, Money amount,
-                              String paymentGatewayReference, String status) {
-        this.subscriptionId = subscriptionId;
-        this.userId = userId;
-        this.amount = amount;
-        this.paymentGatewayReference = paymentGatewayReference;
-        this.status = status;
+    public PaymentTransaction(RecordPaymentCommand command) {
+        this.subscriptionId = command.subscriptionId();
+        this.userId = command.userId();
+        this.amount = command.amount();
+        this.paymentGatewayReference = command.paymentGatewayReference();
+        this.status = command.status();
         this.paidAt = LocalDateTime.now();
     }
 }

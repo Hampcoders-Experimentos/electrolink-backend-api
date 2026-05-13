@@ -3,17 +3,17 @@ package com.hampcoders.electrolink.monitoring.application.internal.commandservic
 import com.hampcoders.electrolink.monitoring.domain.model.aggregates.ServiceOperation;
 import com.hampcoders.electrolink.monitoring.domain.model.commands.CreateServiceOperationCommand;
 import com.hampcoders.electrolink.monitoring.domain.model.commands.UpdateServiceStatusCommand;
-import com.hampcoders.electrolink.monitoring.domain.model.valueobjects.RequestId;
 import com.hampcoders.electrolink.monitoring.domain.model.valueobjects.ServiceStatus;
 import com.hampcoders.electrolink.monitoring.domain.services.ServiceOperationCommandService;
 import com.hampcoders.electrolink.monitoring.infrastructure.persistence.jpa.repositories.ServiceOperationRepository;
-import java.time.OffsetDateTime;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Implementation of the command service for ServiceOperation entities.
  */
 @Service
+@Transactional
 public class ServiceOperationCommandServiceImpl implements ServiceOperationCommandService {
 
   private final ServiceOperationRepository serviceOperationRepository;
@@ -30,15 +30,7 @@ public class ServiceOperationCommandServiceImpl implements ServiceOperationComma
    */
   @Override
   public Long handle(CreateServiceOperationCommand command) {
-    var requestId = command.requestId();
-
-    var serviceOperation = new ServiceOperation(
-        requestId,
-        command.technicianId(),
-        command.startedAt(),
-        command.completedAt(),
-        command.currentStatus()
-    );
+    var serviceOperation = new ServiceOperation(command);
 
     serviceOperationRepository.save(serviceOperation);
     return serviceOperation.getId();
@@ -52,11 +44,12 @@ public class ServiceOperationCommandServiceImpl implements ServiceOperationComma
   @Override
   public void handle(UpdateServiceStatusCommand command) {
     var serviceOperation = serviceOperationRepository
-        .findById(command.serviceOperationId())
-        .orElseThrow(() -> new IllegalArgumentException("ServiceOperation not found"));
+            .findById(command.serviceOperationId())
+            .orElseThrow(() -> new IllegalArgumentException("ServiceOperation not found"));
 
     ServiceStatus newStatus = ServiceStatus.valueOf(command.newStatus());
     serviceOperation.updateStatus(newStatus);
+
     serviceOperationRepository.save(serviceOperation);
   }
 }

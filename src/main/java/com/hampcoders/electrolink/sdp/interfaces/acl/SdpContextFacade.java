@@ -1,28 +1,22 @@
 package com.hampcoders.electrolink.sdp.interfaces.acl;
 
 import com.hampcoders.electrolink.sdp.domain.model.aggregates.Request;
-import com.hampcoders.electrolink.sdp.domain.model.commands.CreateRequestCommand;
 import com.hampcoders.electrolink.sdp.domain.model.commands.DeleteRequestCommand;
-import com.hampcoders.electrolink.sdp.domain.model.commands.UpdateRequestCommand;
 import com.hampcoders.electrolink.sdp.domain.model.queries.FindRequestByIdQuery;
 import com.hampcoders.electrolink.sdp.domain.model.queries.FindRequestsByClientIdQuery;
 import com.hampcoders.electrolink.sdp.domain.model.queries.FindServiceByIdQuery;
 import com.hampcoders.electrolink.sdp.domain.services.RequestCommandService;
 import com.hampcoders.electrolink.sdp.domain.services.RequestQueryService;
 import com.hampcoders.electrolink.sdp.domain.services.ServiceQueryService;
-import com.hampcoders.electrolink.sdp.interfaces.rest.resources.CreateRequestResource;
+import com.hampcoders.electrolink.sdp.interfaces.rest.resource.CreateRequestResource;
+import com.hampcoders.electrolink.sdp.interfaces.rest.transform.CreateRequestCommandFromResourceAssembler;
+import com.hampcoders.electrolink.sdp.interfaces.rest.transform.UpdateRequestCommandFromResourceAssembler;
 import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.stereotype.Service;
 
-/**
- * Facade for the Service Delivery Platform (SDP) context.
- * This class provides a simplified interface for interacting with the request services.
- * It acts as an Anti-Corruption Layer (ACL) to protect the domain from external changes.
- * All methods return primitive types or simple DTOs, not domain models.
- */
 @Service
 public class SdpContextFacade {
 
@@ -68,12 +62,12 @@ public class SdpContextFacade {
   }
 
   public Long createRequest(CreateRequestResource resource) {
-    var command = new CreateRequestCommand(resource);
+    var command = CreateRequestCommandFromResourceAssembler.toCommandFromResource(resource);
     return requestCommandService.handle(command).getId();
   }
 
   public Long updateRequest(Long requestId, CreateRequestResource resource) {
-    var command = new UpdateRequestCommand(requestId, resource);
+    var command = UpdateRequestCommandFromResourceAssembler.toCommandFromResource(requestId, resource);
     return requestCommandService.handle(command).getId();
   }
 
