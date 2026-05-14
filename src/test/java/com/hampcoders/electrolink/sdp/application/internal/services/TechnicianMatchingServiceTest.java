@@ -2,7 +2,7 @@ package com.hampcoders.electrolink.sdp.application.internal.services;
 
 import com.hampcoders.electrolink.assets.interfaces.acl.InventoryContextFacade;
 import com.hampcoders.electrolink.profiles.interfaces.rest.resources.ProfileResource;
-import com.hampcoders.electrolink.sdp.application.internal.outboundservices.IExternalProfileService;
+import com.hampcoders.electrolink.sdp.application.internal.outboundservices.ExternalProfileService;
 import com.hampcoders.electrolink.sdp.domain.model.aggregates.Request;
 import com.hampcoders.electrolink.sdp.infrastructure.persistence.jpa.repositories.ScheduleRepository;
 import org.junit.jupiter.api.DisplayName;
@@ -23,7 +23,7 @@ import static org.mockito.Mockito.*;
 public class TechnicianMatchingServiceTest {
 
     @Mock
-    private IExternalProfileService externalProfileService;
+    private ExternalProfileService externalProfileService;
     @Mock
     private ScheduleRepository scheduleRepository;
     @Mock

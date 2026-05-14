@@ -9,10 +9,21 @@ import com.hampcoders.electrolink.sdp.interfaces.rest.resource.TagResource;
 import java.util.Collections;
 import java.util.List;
 
+/**
+ * Assembles a ServiceResource from a ServiceEntity.
+ */
 public class ServiceResourceFromEntityAssembler {
+
+  /**
+   * Transforms a ServiceEntity into a ServiceResource.
+   *
+   * @param entity the ServiceEntity to transform
+   * @return the resulting ServiceResource
+   */
   public static ServiceResource toResourceFromEntity(final ServiceEntity entity) {
     var policy = entity.getPolicy() != null
-        ? new PolicyResource(entity.getPolicy().getCancellationPolicy(), entity.getPolicy().getTermsAndConditions())
+        ? new PolicyResource(entity.getPolicy().getCancellationPolicy(),
+        entity.getPolicy().getTermsAndConditions())
         : new PolicyResource("", "");
     var restriction = entity.getRestriction() != null
         ? new RestrictionResource(
@@ -24,7 +35,8 @@ public class ServiceResourceFromEntityAssembler {
         ? entity.getTags().stream().map(t -> new TagResource(t.getName())).toList()
         : Collections.<TagResource>emptyList();
     var components = entity.getComponents() != null
-        ? entity.getComponents().stream().map(c -> new ComponentQuantityResource(c.getComponentId(), c.getQuantity())).toList()
+        ? entity.getComponents().stream()
+          .map(c -> new ComponentQuantityResource(c.getComponentId(), c.getQuantity())).toList()
         : Collections.<ComponentQuantityResource>emptyList();
     return new ServiceResource(
         entity.getId(), entity.getName(), entity.getDescription(),

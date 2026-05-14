@@ -2,10 +2,10 @@ package com.hampcoders.electrolink.monitoring.interfaces.rest;
 
 import com.hampcoders.electrolink.monitoring.domain.model.commands.DeleteRatingCommand;
 import com.hampcoders.electrolink.monitoring.domain.model.queries.GetAllRatingsQuery;
+import com.hampcoders.electrolink.monitoring.domain.model.queries.GetFeaturedRatingsByTechnicianIdQuery;
 import com.hampcoders.electrolink.monitoring.domain.model.queries.GetRatingByIdQuery;
 import com.hampcoders.electrolink.monitoring.domain.model.queries.GetRatingsByRequestIdQuery;
 import com.hampcoders.electrolink.monitoring.domain.model.queries.GetRatingsByTechnicianIdQuery;
-import com.hampcoders.electrolink.monitoring.domain.model.queries.GetFeaturedRatingsByTechnicianIdQuery;
 import com.hampcoders.electrolink.monitoring.domain.services.RatingCommandService;
 import com.hampcoders.electrolink.monitoring.domain.services.RatingQueryService;
 import com.hampcoders.electrolink.monitoring.interfaces.rest.resources.CreateRatingResource;
@@ -45,12 +45,25 @@ public class RatingsController {
   private final RatingCommandService commandService;
   private final RatingQueryService queryService;
 
+  /**
+   * Constructor for RatingsController, injecting the necessary command and query services.
+   *
+   * @param commandService The service responsible for handling rating commands.
+   * @param queryService The service responsible for handling rating queries.
+   */
   public RatingsController(RatingCommandService commandService,
                            RatingQueryService queryService) {
     this.commandService = commandService;
     this.queryService = queryService;
   }
 
+  /**
+   * Creates a new rating based on the provided resource data.
+   *
+   * @param resource The data required to create a new rating,
+   *     including score, comment, technician ID, and request ID.
+   * @return The created rating resource with HTTP status 201 (Created).
+   */
   @PostMapping
   public ResponseEntity<RatingResource> createRating(@RequestBody CreateRatingResource resource) {
     var command = CreateRatingCommandFromResourceAssembler.toCommandFromResource(resource);

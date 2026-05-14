@@ -14,40 +14,48 @@ import java.time.LocalDateTime;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+/**
+ * Represents a payment transaction for a subscription.
+ */
 @Entity
 @Table(name = "subscription_payment_transactions")
 @Getter
 @NoArgsConstructor
 public class PaymentTransaction extends AuditableModel {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
 
-    @Column(nullable = false)
-    private Long subscriptionId;
+  @Column(nullable = false)
+  private Long subscriptionId;
 
-    @Column(nullable = false)
-    private Long userId;
+  @Column(nullable = false)
+  private Long userId;
 
-    @Embedded
-    private Money amount;
+  @Embedded
+  private Money amount;
 
-    @Column(nullable = false)
-    private String paymentGatewayReference;
+  @Column(nullable = false)
+  private String paymentGatewayReference;
 
-    @Column(nullable = false)
-    private String status;
+  @Column(nullable = false)
+  private String status;
 
-    @Column(nullable = false)
-    private LocalDateTime paidAt;
+  @Column(nullable = false)
+  private LocalDateTime paidAt;
 
-    public PaymentTransaction(RecordPaymentCommand command) {
-        this.subscriptionId = command.subscriptionId();
-        this.userId = command.userId();
-        this.amount = command.amount();
-        this.paymentGatewayReference = command.paymentGatewayReference();
-        this.status = command.status();
-        this.paidAt = LocalDateTime.now();
-    }
+  /**
+   * Creates a new PaymentTransaction based on the provided RecordPaymentCommand.
+   *
+   * @param command the command containing payment details to create the transaction
+   */
+  public PaymentTransaction(RecordPaymentCommand command) {
+    this.subscriptionId = command.subscriptionId();
+    this.userId = command.userId();
+    this.amount = command.amount();
+    this.paymentGatewayReference = command.paymentGatewayReference();
+    this.status = command.status();
+    this.paidAt = LocalDateTime.now();
+  }
 }

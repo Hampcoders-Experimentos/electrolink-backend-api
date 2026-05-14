@@ -12,6 +12,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+/**
+ * REST controller for managing report photos, providing endpoints for adding photos to reports.
+ */
 @Tag(name = "Report Photos", description = "Photo management for reports")
 @RestController
 @RequestMapping(value = "/api/v1/photos", produces = MediaType.APPLICATION_JSON_VALUE)

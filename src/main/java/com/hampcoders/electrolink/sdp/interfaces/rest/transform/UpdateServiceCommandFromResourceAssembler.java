@@ -7,7 +7,18 @@ import com.hampcoders.electrolink.sdp.domain.model.valueobjects.Policy;
 import com.hampcoders.electrolink.sdp.domain.model.valueobjects.Restriction;
 import com.hampcoders.electrolink.sdp.interfaces.rest.resource.CreateServiceResource;
 
+/**
+ * Assembler class that transforms a CreateServiceResource into an UpdateServiceCommand.
+ */
 public class UpdateServiceCommandFromResourceAssembler {
+
+  /**
+   * Converts a CreateServiceResource into an UpdateServiceCommand, using the provided serviceId.
+   *
+   * @param serviceId the ID of the service to be updated
+   * @param resource the CreateServiceResource containing the new service data
+   * @return an UpdateServiceCommand with the data from the resource and the provided serviceId
+   */
   public static UpdateServiceCommand toCommandFromResource(
       final Long serviceId, final CreateServiceResource resource) {
     var policy = new Policy(

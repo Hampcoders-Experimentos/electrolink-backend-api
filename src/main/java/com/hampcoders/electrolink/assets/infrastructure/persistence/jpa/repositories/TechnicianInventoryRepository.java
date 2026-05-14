@@ -37,8 +37,8 @@ public interface TechnicianInventoryRepository extends JpaRepository<TechnicianI
   Optional<TechnicianInventory> findByTechnicianId(Long technicianId);
 
   /**
-   * Finds all TechnicianInventories that have at least one
-     stock item below the specified threshold.
+   * Finds all TechnicianInventories that have at least
+   * one stock item below the specified threshold.
    *
    * @param threshold The low stock quantity threshold.
    * @return A list of inventories with low stock items.

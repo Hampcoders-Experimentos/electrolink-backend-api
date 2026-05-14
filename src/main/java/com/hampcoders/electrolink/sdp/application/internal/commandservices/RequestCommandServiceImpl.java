@@ -11,6 +11,9 @@ import com.hampcoders.electrolink.subscription.interfaces.acl.SubscriptionContex
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
+/**
+ * Implementation of the RequestCommandService interface for handling request-related commands.
+ */
 @Service
 public class RequestCommandServiceImpl implements RequestCommandService {
 
@@ -18,6 +21,13 @@ public class RequestCommandServiceImpl implements RequestCommandService {
   private final SubscriptionContextFacade subscriptionContextFacade;
   private final TechnicianMatchingService technicianMatchingService;
 
+  /**
+   * Constructor for RequestCommandServiceImpl.
+   *
+   * @param requestRepository the repository for managing request persistence
+   * @param subscriptionContextFacade the facade for managing subscription context and limits
+   * @param technicianMatchingService the service for matching technicians to requests
+   */
   public RequestCommandServiceImpl(RequestRepository requestRepository,
                                    SubscriptionContextFacade subscriptionContextFacade,
                                    TechnicianMatchingService technicianMatchingService) {
@@ -41,7 +51,9 @@ public class RequestCommandServiceImpl implements RequestCommandService {
       technicianMatchingService.findBestTechnicianForRequest(request)
           .ifPresentOrElse(
               request::assignTechnician,
-              () -> { throw new IllegalStateException("No available technician found for this request"); }
+              () -> {
+                throw new IllegalStateException("No available technician found for this request");
+              }
           );
     }
 

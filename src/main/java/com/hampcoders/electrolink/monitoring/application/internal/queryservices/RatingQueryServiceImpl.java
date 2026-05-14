@@ -2,10 +2,10 @@ package com.hampcoders.electrolink.monitoring.application.internal.queryservices
 
 import com.hampcoders.electrolink.monitoring.domain.model.aggregates.Rating;
 import com.hampcoders.electrolink.monitoring.domain.model.queries.GetAllRatingsQuery;
+import com.hampcoders.electrolink.monitoring.domain.model.queries.GetFeaturedRatingsByTechnicianIdQuery;
 import com.hampcoders.electrolink.monitoring.domain.model.queries.GetRatingByIdQuery;
 import com.hampcoders.electrolink.monitoring.domain.model.queries.GetRatingsByRequestIdQuery;
 import com.hampcoders.electrolink.monitoring.domain.model.queries.GetRatingsByTechnicianIdQuery;
-import com.hampcoders.electrolink.monitoring.domain.model.queries.GetFeaturedRatingsByTechnicianIdQuery;
 import com.hampcoders.electrolink.monitoring.domain.model.valueobjects.RequestId;
 import com.hampcoders.electrolink.monitoring.domain.model.valueobjects.TechnicianId;
 import com.hampcoders.electrolink.monitoring.domain.services.RatingQueryService;
@@ -22,6 +22,11 @@ public class RatingQueryServiceImpl implements RatingQueryService {
 
   private final RatingRepository ratingRepository;
 
+  /**
+   * Constructor for RatingQueryServiceImpl.
+   *
+   * @param ratingRepository The repository used to access Rating data from the database.
+   */
   public RatingQueryServiceImpl(RatingRepository ratingRepository) {
     this.ratingRepository = ratingRepository;
   }
@@ -78,6 +83,7 @@ public class RatingQueryServiceImpl implements RatingQueryService {
    */
   @Override
   public List<Rating> handle(GetFeaturedRatingsByTechnicianIdQuery query) {
-    return ratingRepository.findByTechnicianIdAndIsFeatured(new TechnicianId(query.technicianId()), true);
+    return ratingRepository.findByTechnicianIdAndIsFeatured(
+        new TechnicianId(query.technicianId()), true);
   }
 }

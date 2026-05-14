@@ -23,6 +23,11 @@ public class RolesController {
 
   private final RoleQueryService roleQueryService;
 
+  /**
+   * Constructor for RolesController.
+   *
+   * @param roleQueryService The service to handle role queries
+   */
   public RolesController(RoleQueryService roleQueryService) {
     this.roleQueryService = roleQueryService;
   }

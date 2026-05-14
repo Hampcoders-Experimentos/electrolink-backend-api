@@ -16,8 +16,8 @@ import lombok.With;
 
 /**
  * Role entity.
- * <p>
- * This entity represents the role of a user in the system.
+ *
+ * <p>This entity represents the role of a user in the system.
  * It is used to define the permissions of a user.
  * </p>
  */
@@ -35,6 +35,11 @@ public class Role {
   @Column(length = 20, unique = true)
   private Roles name;
 
+  /**
+   * Constructor for Role.
+   *
+   * @param name the name of the role
+   */
   public Role(Roles name) {
     this.name = name;
   }
@@ -69,8 +74,8 @@ public class Role {
 
   /**
    * Validate the role set.
-   * <p>
-   * This method validates the role set and returns the default role if the set is empty.
+   *
+   * <p>This method validates the role set and returns the default role if the set is empty.
    * </p>
    *
    * @param roles the role set

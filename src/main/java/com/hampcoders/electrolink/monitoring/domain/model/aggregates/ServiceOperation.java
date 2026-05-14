@@ -55,9 +55,17 @@ public class ServiceOperation extends AuditableAbstractAggregateRootNoId<Service
   @Column(nullable = false)
   private TechnicianId technicianId;
 
+  /**
+   * Default constructor for JPA. Not intended for direct use.
+   */
   public ServiceOperation() {
   }
 
+  /**
+   * Constructs a new ServiceOperation based on the provided command.
+   *
+   * @param command the command containing the details to create a new service operation
+   */
   public ServiceOperation(CreateServiceOperationCommand command) {
     this.requestId = command.requestId();
     this.technicianId = command.technicianId();
@@ -66,6 +74,11 @@ public class ServiceOperation extends AuditableAbstractAggregateRootNoId<Service
     this.currentStatus = command.currentStatus();
   }
 
+  /**
+   * Updates the status of the service operation.
+   *
+   * @param status the new status to set for the service operation
+   */
   public void updateStatus(ServiceStatus status) {
     this.currentStatus = status;
     if (status == ServiceStatus.COMPLETED) {
@@ -78,6 +91,11 @@ public class ServiceOperation extends AuditableAbstractAggregateRootNoId<Service
     }
   }
 
+  /**
+   * Retrieves the current status of the service operation.
+   *
+   * @return the current status of the service operation
+   */
   public ServiceStatus getStatus() {
     return currentStatus;
   }

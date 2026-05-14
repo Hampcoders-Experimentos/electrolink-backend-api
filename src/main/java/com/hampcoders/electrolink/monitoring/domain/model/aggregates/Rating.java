@@ -63,9 +63,17 @@ public class Rating extends AuditableAbstractAggregateRootNoId<Rating> {
   @Column(name = "is_featured")
   private Boolean isFeatured = false;
 
+  /**
+   * Default constructor for JPA.
+   */
   protected Rating() {
   }
 
+  /**
+   * Constructs a new Rating based on the provided AddRatingCommand.
+   *
+   * @param command the command containing the details for creating a new rating
+   */
   public Rating(AddRatingCommand command) {
     this.requestId = command.requestId();
     this.score = command.score();
@@ -75,18 +83,35 @@ public class Rating extends AuditableAbstractAggregateRootNoId<Rating> {
     this.isFeatured = false;
   }
 
+  /**
+   * Updates the score of the rating.
+   *
+   * @param score the new score to set, must be between 1 and 5
+   */
   public void updateScore(int score) {
     this.score = score;
   }
 
+  /**
+   * Updates the comment of the rating.
+   *
+   * @param comment the new comment to set, must be at most 300 characters
+   */
   public void updateComment(String comment) {
     this.comment = comment;
   }
 
+  /**
+   * Marks this rating as featured, indicating it is highlighted for special attention.
+   */
   public void feature() {
     this.isFeatured = true;
   }
 
+  /**
+   * Marks this rating as not featured,
+   * indicating it is no longer highlighted for special attention.
+   */
   public void unfeature() {
     this.isFeatured = false;
   }

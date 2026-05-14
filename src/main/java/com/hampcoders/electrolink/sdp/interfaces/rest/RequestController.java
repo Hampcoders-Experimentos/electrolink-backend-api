@@ -23,6 +23,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+/**
+ * REST controller for managing requests in the SDP application.
+ */
 @RestController
 @RequestMapping("/api/v1/requests")
 public class RequestController {
@@ -30,12 +33,24 @@ public class RequestController {
   private final RequestCommandService requestCommandService;
   private final RequestQueryService requestQueryService;
 
+  /**
+   * Constructor for RequestController.
+   *
+   * @param requestCommandService the service for handling request commands
+   * @param requestQueryService the service for handling request queries
+   */
   public RequestController(RequestCommandService requestCommandService,
                            RequestQueryService requestQueryService) {
     this.requestCommandService = requestCommandService;
     this.requestQueryService = requestQueryService;
   }
 
+  /**
+   * Endpoint to create a new request.
+   *
+   * @param resource the resource containing request details
+   * @return a response entity with a message indicating the result of the operation
+   */
   @PostMapping
   public ResponseEntity<MessageResource> createRequest(
       @RequestBody CreateRequestResource resource) {
@@ -45,6 +60,12 @@ public class RequestController {
         + savedRequest.getId()), HttpStatus.CREATED);
   }
 
+  /**
+   * Endpoint to retrieve a request by its ID.
+   *
+   * @param id the ID of the request to retrieve
+   * @return a response entity with the requested request or a not found error
+   */
   @GetMapping("/{id}")
   public ResponseEntity<RequestResource> getRequestById(@PathVariable Long id) {
     var query = new FindRequestByIdQuery(id);
@@ -53,6 +74,12 @@ public class RequestController {
         .orElse(ResponseEntity.notFound().build());
   }
 
+  /**
+   * Endpoint to retrieve all requests associated with a specific client ID.
+   *
+   * @param clientId the ID of the client whose requests to retrieve
+   * @return a response entity with a list of requests associated with the client
+   */
   @GetMapping("/clients/{clientId}/requests")
   public ResponseEntity<List<RequestResource>> getRequestsByClient(@PathVariable String clientId) {
     var query = new FindRequestsByClientIdQuery(clientId);
@@ -63,6 +90,13 @@ public class RequestController {
     return ResponseEntity.ok(resources);
   }
 
+  /**
+   * Endpoint to update an existing request.
+   *
+   * @param id the ID of the request to update
+   * @param resource the resource containing updated request details
+   * @return a response entity with a message indicating the result of the operation
+   */
   @PutMapping("/{id}")
   public ResponseEntity<MessageResource> updateRequest(
       @PathVariable Long id,
@@ -72,6 +106,12 @@ public class RequestController {
     return ResponseEntity.ok(new MessageResource("Request updated successfully."));
   }
 
+  /**
+   * Endpoint to delete a request by its ID.
+   *
+   * @param id the ID of the request to delete
+   * @return a response entity with a message indicating the result of the operation
+   */
   @DeleteMapping("/{id}")
   public ResponseEntity<MessageResource> deleteRequest(@PathVariable Long id) {
     var command = new DeleteRequestCommand(id);

@@ -2,8 +2,8 @@ package com.hampcoders.electrolink.monitoring.domain.model.valueobjects;
 
 /**
  * Enum representing the different types of reports in the system.
- * <p>
- * Possible values are:
+ *
+ * <p>Possible values are:
  * <ul>
  *   <li>INCIDENT: A report of an incident.</li>
  *   <li>COMPLETION: A report indicating the completion of an operation.</li>

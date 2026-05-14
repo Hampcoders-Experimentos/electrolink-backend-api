@@ -18,6 +18,11 @@ public class ReportQueryServiceImpl implements ReportQueryService {
 
   private final ReportRepository reportRepository;
 
+  /**
+   * Constructor for ReportQueryServiceImpl, injecting the ReportRepository.
+   *
+   * @param reportRepository The repository used to access Report entities from the database.
+   */
   public ReportQueryServiceImpl(ReportRepository reportRepository) {
     this.reportRepository = reportRepository;
   }

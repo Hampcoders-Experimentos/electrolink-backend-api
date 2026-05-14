@@ -3,7 +3,6 @@ package com.hampcoders.electrolink.assets.application.internal.outboundservices;
 import com.hampcoders.electrolink.assets.domain.model.valueobjects.TechnicianId;
 import com.hampcoders.electrolink.profiles.interfaces.acl.ProfilesContextFacade;
 import java.util.Optional;
-
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
@@ -30,7 +29,7 @@ public class ExternalProfileService {
    *
    * @param email The email address to search for.
    * @return An Optional containing the TechnicianId,
-     or empty if no profile is found or the ID is 0L.
+   *     or empty if no profile is found or the ID is 0L.
    */
   public Optional<TechnicianId> fetchTechnicianIdByEmail(final String email) {
     var profileId = profilesContextFacade.fetchProfileIdByEmail(email);

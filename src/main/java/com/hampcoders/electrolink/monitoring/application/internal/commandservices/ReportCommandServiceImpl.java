@@ -19,6 +19,12 @@ public class ReportCommandServiceImpl implements ReportCommandService {
   private final ServiceOperationRepository serviceOperationRepository;
   private final ReportRepository reportRepository;
 
+  /**
+   * Constructor for ReportCommandServiceImpl.
+   *
+   * @param reportRepository The repository for managing Report entities.
+   * @param serviceOperationRepository The repository for managing ServiceOperation entities.
+   */
   public ReportCommandServiceImpl(ReportRepository reportRepository,
                                   ServiceOperationRepository serviceOperationRepository) {
     this.reportRepository = reportRepository;

@@ -6,7 +6,17 @@ import com.hampcoders.electrolink.sdp.interfaces.rest.resource.PhotoResource;
 import com.hampcoders.electrolink.sdp.interfaces.rest.resource.RequestResource;
 import java.util.List;
 
+/**
+ * Assembles a RequestResource from a Request entity.
+ */
 public class RequestResourceFromEntityAssembler {
+
+  /**
+   * Converts a Request entity to a RequestResource.
+   *
+   * @param entity the Request entity to convert
+   * @return the corresponding RequestResource
+   */
   public static RequestResource toResourceFromEntity(final Request entity) {
     var bill = new BillResource(
         entity.getBill().getBillingPeriod(),

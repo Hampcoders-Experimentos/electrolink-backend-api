@@ -17,8 +17,8 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 /**
  * Bearer Authorization Request Filter.
- * <p>
- * This class is responsible for filtering requests and setting the user authentication.
+ *
+ * <p>This class is responsible for filtering requests and setting the user authentication.
  * It extends the OncePerRequestFilter class.
  * </p>
  *
@@ -33,6 +33,14 @@ public class BearerAuthorizationRequestFilter extends OncePerRequestFilter {
   @Qualifier("defaultUserDetailsService")
   private final UserDetailsService userDetailsService;
 
+  /**
+   * Bearer Authorization Request Filter Constructor.
+   *
+   * @param tokenService the BearerTokenService to be used by this filter
+   *     to validate the token and get the username from the token
+   * @param userDetailsService the UserDetailsService
+   *     to be used by this filter to load user details
+   */
   public BearerAuthorizationRequestFilter(BearerTokenService tokenService,
                                           UserDetailsService userDetailsService) {
     this.tokenService = tokenService;

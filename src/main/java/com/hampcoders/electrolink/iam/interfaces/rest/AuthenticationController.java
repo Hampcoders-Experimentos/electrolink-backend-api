@@ -20,8 +20,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 /**
  * AuthenticationController.
- * <p>
- * This controller is responsible for handling authentication requests.
+ *
+ * <p>This controller is responsible for handling authentication requests.
  * It exposes two endpoints:
  * <ul>
  * <li>POST /api/v1/auth/sign-in</li>
@@ -36,6 +36,12 @@ public class AuthenticationController {
 
   private final UserCommandService userCommandService;
 
+  /**
+   * Authentication Controller Constructor.
+   *
+   * @param userCommandService the UserCommandService to be used
+   *     by this controller to handle authentication requests
+   */
   public AuthenticationController(UserCommandService userCommandService) {
     this.userCommandService = userCommandService;
   }

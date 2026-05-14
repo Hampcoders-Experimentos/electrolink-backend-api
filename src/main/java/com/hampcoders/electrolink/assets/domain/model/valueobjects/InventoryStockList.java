@@ -25,7 +25,6 @@ public class InventoryStockList {
       orphanRemoval = true)
   private List<ComponentStock> items;
 
-
   /**
    * Constructs an empty InventoryStockList.
    */

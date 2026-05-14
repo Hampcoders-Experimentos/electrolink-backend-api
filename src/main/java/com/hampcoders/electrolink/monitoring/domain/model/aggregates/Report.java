@@ -44,9 +44,17 @@ public class Report extends AuditableAbstractAggregateRootNoId<Report> {
   @Column(nullable = false, length = 500)
   private String description;
 
+  /**
+   * Default constructor required by JPA.
+   */
   protected Report() {
   }
 
+  /**
+   * Constructs a new Report based on the provided AddReportCommand.
+   *
+   * @param command the command containing the details for creating the report
+   */
   public Report(AddReportCommand command) {
     this.serviceOperationId = command.serviceOperationId();
     this.reportType = command.reportType();

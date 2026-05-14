@@ -18,6 +18,11 @@ public class ServiceOperationCommandServiceImpl implements ServiceOperationComma
 
   private final ServiceOperationRepository serviceOperationRepository;
 
+  /**
+   * Constructor for ServiceOperationCommandServiceImpl.
+   *
+   * @param serviceOperationRepository The repository for managing ServiceOperation entities.
+   */
   public ServiceOperationCommandServiceImpl(ServiceOperationRepository serviceOperationRepository) {
     this.serviceOperationRepository = serviceOperationRepository;
   }

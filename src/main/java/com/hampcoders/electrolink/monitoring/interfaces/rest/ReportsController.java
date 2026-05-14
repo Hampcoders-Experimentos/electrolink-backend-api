@@ -38,12 +38,24 @@ public class ReportsController {
   private final ReportCommandService commandService;
   private final ReportQueryService queryService;
 
+  /**
+   * Constructor for ReportsController, injecting the necessary command and query services.
+   *
+   * @param commandService The service responsible for handling report-related commands.
+   * @param queryService The service responsible for handling report-related queries.
+   */
   public ReportsController(ReportCommandService commandService,
                            ReportQueryService queryService) {
     this.commandService = commandService;
     this.queryService = queryService;
   }
 
+  /**
+   * Creates a new report based on the provided resource data. The method handles the
+   *
+   * @param resource The resource containing the data needed to create a new report.
+   * @return The created report resource with HTTP status 201 (Created).
+   */
   @PostMapping
   public ResponseEntity<ReportResource> createReport(@RequestBody CreateReportResource resource) {
     var command = CreateReportCommandFromResourceAssembler.toCommandFromResource(resource);

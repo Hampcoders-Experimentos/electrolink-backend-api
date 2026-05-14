@@ -16,6 +16,11 @@ public class RoleCommandServiceImpl implements RoleCommandService {
 
   private final RoleRepository roleRepository;
 
+  /**
+   * Constructor for RoleCommandServiceImpl.
+   *
+   * @param roleRepository the repository to manage Role entities
+   */
   public RoleCommandServiceImpl(RoleRepository roleRepository) {
     this.roleRepository = roleRepository;
   }

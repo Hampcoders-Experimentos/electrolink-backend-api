@@ -6,17 +6,33 @@ import com.hampcoders.electrolink.profiles.interfaces.rest.resources.ProfileReso
 import java.util.List;
 import org.springframework.stereotype.Service;
 
+/**
+ * Service class responsible for handling external profile-related operations,
+ * such as fetching technicians from the Profiles context.
+ * This service interacts with the ProfilesContextFacade
+ * to perform necessary actions related to profile management for technicians.
+ */
 @Service
-public class ExternalProfileService implements IExternalProfileService {
+public class ExternalProfileService {
 
-    private final ProfilesContextFacade profilesContextFacade;
+  private final ProfilesContextFacade profilesContextFacade;
 
-    public ExternalProfileService(ProfilesContextFacade profilesContextFacade) {
-        this.profilesContextFacade = profilesContextFacade;
-    }
+  /**
+   * External Profile Service Constructor.
+   *
+   * @param profilesContextFacade The ProfilesContextFacade used to interact
+   *     with the profile management system.
+   */
+  public ExternalProfileService(ProfilesContextFacade profilesContextFacade) {
+    this.profilesContextFacade = profilesContextFacade;
+  }
 
-    @Override
-    public List<ProfileResource> fetchTechnicians() {
-        return profilesContextFacade.fetchProfilesByRole(Role.TECHNICIAN);
-    }
+  /**
+   * Fetches a list of technicians from the Profiles context by using the ProfilesContextFacade.
+   *
+   * @return A list of ProfileResource objects representing the technicians.
+   */
+  public List<ProfileResource> fetchTechnicians() {
+    return profilesContextFacade.fetchProfilesByRole(Role.TECHNICIAN);
+  }
 }

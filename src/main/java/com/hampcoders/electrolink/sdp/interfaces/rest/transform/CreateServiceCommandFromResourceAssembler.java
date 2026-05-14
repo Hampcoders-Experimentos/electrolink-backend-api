@@ -7,7 +7,17 @@ import com.hampcoders.electrolink.sdp.domain.model.valueobjects.Policy;
 import com.hampcoders.electrolink.sdp.domain.model.valueobjects.Restriction;
 import com.hampcoders.electrolink.sdp.interfaces.rest.resource.CreateServiceResource;
 
+/**
+ * Assembler class responsible for transforming a CreateServiceResource into a CreateServiceCommand.
+ */
 public class CreateServiceCommandFromResourceAssembler {
+
+  /**
+   * Converts a CreateServiceResource into a CreateServiceCommand.
+   *
+   * @param resource The CreateServiceResource containing the data to be transformed.
+   * @return A CreateServiceCommand object populated with the data from the resource.
+   */
   public static CreateServiceCommand toCommandFromResource(final CreateServiceResource resource) {
     var policy = new Policy(
         resource.policy().cancellationPolicy(),

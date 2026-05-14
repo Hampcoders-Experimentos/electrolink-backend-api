@@ -2,10 +2,10 @@ package com.hampcoders.electrolink.monitoring.domain.services;
 
 import com.hampcoders.electrolink.monitoring.domain.model.aggregates.Rating;
 import com.hampcoders.electrolink.monitoring.domain.model.queries.GetAllRatingsQuery;
+import com.hampcoders.electrolink.monitoring.domain.model.queries.GetFeaturedRatingsByTechnicianIdQuery;
 import com.hampcoders.electrolink.monitoring.domain.model.queries.GetRatingByIdQuery;
 import com.hampcoders.electrolink.monitoring.domain.model.queries.GetRatingsByRequestIdQuery;
 import com.hampcoders.electrolink.monitoring.domain.model.queries.GetRatingsByTechnicianIdQuery;
-import com.hampcoders.electrolink.monitoring.domain.model.queries.GetFeaturedRatingsByTechnicianIdQuery;
 import java.util.List;
 import java.util.Optional;
 

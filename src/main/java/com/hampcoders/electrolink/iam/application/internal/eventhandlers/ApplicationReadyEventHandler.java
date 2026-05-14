@@ -19,6 +19,12 @@ public class ApplicationReadyEventHandler {
   private static final Logger LOGGER
       = LoggerFactory.getLogger(ApplicationReadyEventHandler.class);
 
+  /**
+   * Application Ready Event Handler Constructor.
+   *
+   * @param roleCommandService the RoleCommandService to be used by this event handler
+   *     to seed the roles when the application is ready
+   */
   public ApplicationReadyEventHandler(RoleCommandService roleCommandService) {
     this.roleCommandService = roleCommandService;
   }

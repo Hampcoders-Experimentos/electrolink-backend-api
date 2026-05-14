@@ -27,6 +27,11 @@ public class UsersController {
 
   private final UserQueryService userQueryService;
 
+  /**
+   * Users Controller Constructor.
+   *
+   * @param userQueryService the user query service to handle user queries.
+   */
   public UsersController(UserQueryService userQueryService) {
     this.userQueryService = userQueryService;
   }

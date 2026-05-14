@@ -19,9 +19,17 @@ public class ScheduleAggregate extends AuditableAbstractAggregateRoot<ScheduleAg
   private String startTime;
   private String endTime;
 
+  /**
+   * Protected no-args constructor required by JPA.
+   */
   protected ScheduleAggregate() {
   }
 
+  /**
+   * Constructs a new ScheduleAggregate based on the provided CreateScheduleCommand.
+   *
+   * @param command the command containing the details for creating a new schedule
+   */
   public ScheduleAggregate(final CreateScheduleCommand command) {
     this.technicianId = command.technicianId();
     this.day = command.day();
@@ -29,6 +37,11 @@ public class ScheduleAggregate extends AuditableAbstractAggregateRoot<ScheduleAg
     this.endTime = command.endTime();
   }
 
+  /**
+   * Updates the schedule aggregate with new values from the provided UpdateScheduleCommand.
+   *
+   * @param command the command containing the updated details for the schedule
+   */
   public void updateFrom(final UpdateScheduleCommand command) {
     this.technicianId = command.technicianId();
     this.day = command.day();

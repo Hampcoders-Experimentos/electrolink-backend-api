@@ -9,11 +9,20 @@ import com.hampcoders.electrolink.sdp.infrastructure.persistence.jpa.repositorie
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
+/**
+ * Implementation of the ServiceCommandService interface
+ * that handles commands related to ServiceEntity.
+ */
 @Service
 public class ServiceCommandServiceImpl implements ServiceCommandService {
 
   private final ServiceRepository serviceRepository;
 
+  /**
+   * Constructor for ServiceCommandServiceImpl.
+   *
+   * @param serviceRepository the repository for managing ServiceEntity persistence and retrieval
+   */
   public ServiceCommandServiceImpl(ServiceRepository serviceRepository) {
     this.serviceRepository = serviceRepository;
   }

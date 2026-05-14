@@ -1,9 +1,6 @@
 package com.hampcoders.electrolink.profiles.application.internal.commandservices;
 
-import com.hampcoders.electrolink.assets.domain.model.commands.CreateTechnicianInventoryCommand;
-import com.hampcoders.electrolink.assets.domain.model.valueobjects.TechnicianId;
-import com.hampcoders.electrolink.assets.domain.services.TechnicianInventoryCommandService;
-import com.hampcoders.electrolink.profiles.application.internal.outboundservices.IExternalAssetsService;
+import com.hampcoders.electrolink.profiles.application.internal.outboundservices.ExternalAssetsService;
 import com.hampcoders.electrolink.profiles.domain.model.aggregates.Profile;
 import com.hampcoders.electrolink.profiles.domain.model.commands.CreateProfileCommand;
 import com.hampcoders.electrolink.profiles.domain.model.commands.DeleteProfileCommand;
@@ -16,25 +13,43 @@ import com.hampcoders.electrolink.profiles.domain.model.valueobjects.Role;
 import com.hampcoders.electrolink.profiles.domain.model.valueobjects.StreetAddress;
 import com.hampcoders.electrolink.profiles.domain.services.ProfileCommandService;
 import com.hampcoders.electrolink.profiles.infrastructure.persistence.jpa.repositories.ProfileRepository;
+import java.util.Optional;
 import org.springframework.stereotype.Service;
 
-import java.util.Optional;
-
+/**
+ * Implementation of the ProfileCommandService interface
+ * that handles the business logic for creating, updating, and deleting profiles.
+ */
 @Service
 public class ProfileCommandServiceImpl implements ProfileCommandService {
 
   private final ProfileRepository profileRepository;
-  private final IExternalAssetsService externalAssetsService;
+  private final ExternalAssetsService externalAssetsService;
 
-  public ProfileCommandServiceImpl(ProfileRepository profileRepository, IExternalAssetsService externalAssetsService) {
+  /**
+   * Constructor for ProfileCommandServiceImpl.
+   *
+   * @param profileRepository The Profile Repository for accessing profile data in the database
+   * @param externalAssetsService The External Assets Service for
+   *     handling related operations when creating technicians
+   */
+  public ProfileCommandServiceImpl(ProfileRepository profileRepository,
+                                   ExternalAssetsService externalAssetsService) {
     this.profileRepository = profileRepository;
     this.externalAssetsService = externalAssetsService;
   }
 
+  /**
+   * Handles the creation of a new profile based on the provided CreateProfileCommand.
+   *
+   * @param command The command containing the details for creating a profile.
+   * @return The ID of the newly created profile.
+   */
   @Override
   public Long handle(CreateProfileCommand command) {
     if (profileRepository.existsByEmail_Address(command.email())) {
-      throw new IllegalArgumentException("A profile with email " + command.email() + " already exists.");
+      throw new IllegalArgumentException("A profile with email "
+          + command.email() + " already exists.");
     }
 
     var personName = new PersonName(command.firstName(), command.lastName());
@@ -62,6 +77,15 @@ public class ProfileCommandServiceImpl implements ProfileCommandService {
     }
   }
 
+  /**
+   * Handles the update of an existing profile based on the provided UpdateProfileCommand.
+   *
+   * @param command The command containing the details for updating a profile.
+   * @return An Optional containing the updated Profile if the update was successful,
+   *     or an empty Optional if the profile does not exist.
+   * @throws IllegalArgumentException if the profile does not exist
+   *     or if the email is already used by another profile.
+   */
   @Override
   public Optional<Profile> handle(UpdateProfileCommand command) {
     var profileId = command.profileId();
@@ -71,7 +95,8 @@ public class ProfileCommandServiceImpl implements ProfileCommandService {
     }
 
     if (profileRepository.existsByEmail_AddressAndIdIsNot(command.email(), profileId)) {
-      throw new IllegalArgumentException("Email " + command.email() + " is already used by another profile.");
+      throw new IllegalArgumentException("Email "
+          + command.email() + " is already used by another profile.");
     }
 
     var profileToUpdate = profileRepository.findById(profileId).get();
@@ -99,7 +124,8 @@ public class ProfileCommandServiceImpl implements ProfileCommandService {
   @Override
   public void handle(DeleteProfileCommand command) {
     if (!profileRepository.existsById(command.profileId())) {
-      throw new IllegalArgumentException("Profile with id " + command.profileId() + " does not exist.");
+      throw new IllegalArgumentException("Profile with id "
+          + command.profileId() + " does not exist.");
     }
 
     try {

@@ -11,8 +11,8 @@ import org.springframework.stereotype.Component;
 
 /**
  * Unauthorized Request Handler.
- * <p>
- * This class is responsible for handling unauthorized requests.
+ *
+ * <p>This class is responsible for handling unauthorized requests.
  * It is used by the Spring Security framework to handle unauthorized requests.
  * It implements the AuthenticationEntryPoint interface.
  * </p>

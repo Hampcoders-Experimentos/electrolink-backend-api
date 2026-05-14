@@ -6,7 +6,17 @@ import com.hampcoders.electrolink.sdp.domain.model.entities.Photo;
 import com.hampcoders.electrolink.sdp.interfaces.rest.resource.CreateRequestResource;
 import java.util.List;
 
+/**
+ * Assembler class responsible for transforming a CreateRequestResource.
+ */
 public class CreateRequestCommandFromResourceAssembler {
+
+  /**
+   * Command assembler method that converts a CreateRequestResource into a CreateRequestCommand.
+   *
+   * @param resource The CreateRequestResource containing the data to be transformed.
+   * @return A CreateRequestCommand object populated with the data from the resource.
+   */
   public static CreateRequestCommand toCommandFromResource(final CreateRequestResource resource) {
     var bill = new Bill(
         resource.bill().billingPeriod(),

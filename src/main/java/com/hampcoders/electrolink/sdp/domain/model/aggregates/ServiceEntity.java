@@ -46,9 +46,17 @@ public class ServiceEntity extends AuditableAbstractAggregateRoot<ServiceEntity>
   @JoinColumn(name = "service_id")
   private List<ComponentQuantity> components = new ArrayList<>();
 
+  /**
+   * Default Constructor for JPA.
+   */
   protected ServiceEntity() {
   }
 
+  /**
+   * Constructs a new ServiceEntity based on the provided CreateServiceCommand.
+   *
+   * @param command the command containing the details for creating a new service
+   */
   public ServiceEntity(final CreateServiceCommand command) {
     this.name = command.name();
     this.description = command.description();
@@ -60,9 +68,15 @@ public class ServiceEntity extends AuditableAbstractAggregateRoot<ServiceEntity>
     this.policy = command.policy();
     this.restriction = command.restriction();
     this.tags = command.tags() != null ? new ArrayList<>(command.tags()) : new ArrayList<>();
-    this.components = command.components() != null ? new ArrayList<>(command.components()) : new ArrayList<>();
+    this.components = command.components() != null
+        ? new ArrayList<>(command.components()) : new ArrayList<>();
   }
 
+  /**
+   * Updates the ServiceEntity's attributes based on the provided UpdateServiceCommand.
+   *
+   * @param command the command containing the details for updating the service
+   */
   public void updateFrom(final UpdateServiceCommand command) {
     this.name = command.name();
     this.description = command.description();
@@ -83,6 +97,9 @@ public class ServiceEntity extends AuditableAbstractAggregateRoot<ServiceEntity>
     }
   }
 
+  /**
+   * Registers a ServiceCataloguedEvent to indicate that a new service has been created.
+   */
   public void registerCreatedEvent() {
     registerEvent(new ServiceCataloguedEvent(this.getId(), this.createdBy, this.name));
   }

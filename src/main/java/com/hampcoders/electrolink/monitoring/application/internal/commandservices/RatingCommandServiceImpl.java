@@ -21,6 +21,12 @@ public class RatingCommandServiceImpl implements RatingCommandService {
   private final RatingRepository ratingRepository;
   private final ServiceOperationRepository serviceOperationRepository;
 
+  /**
+   * Constructor for RatingCommandServiceImpl.
+   *
+   * @param ratingRepository Repository for managing Rating entities.
+   * @param serviceOperationRepository Repository for managing ServiceOperation entities.
+   */
   public RatingCommandServiceImpl(RatingRepository ratingRepository,
                                   ServiceOperationRepository serviceOperationRepository) {
     this.ratingRepository = ratingRepository;

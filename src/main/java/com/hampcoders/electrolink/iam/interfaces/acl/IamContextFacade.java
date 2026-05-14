@@ -13,8 +13,8 @@ import org.springframework.stereotype.Service;
 
 /**
  * IamContextFacade.
- * <p>
- * This class is a facade for the IAM context. It provides a simple interface for other
+ *
+ * <p>This class is a facade for the IAM context. It provides a simple interface for other
  * bounded contexts to interact with the
  * IAM context.
  * This class is a part of the ACL layer.
@@ -27,6 +27,12 @@ public class IamContextFacade {
   private final UserCommandService userCommandService;
   private final UserQueryService userQueryService;
 
+  /**
+   * Iam Context Facade Constructor.
+   *
+   * @param userCommandService The UserCommandService used to handle user-related commands.
+   * @param userQueryService The UserQueryService used to handle user-related queries.
+   */
   public IamContextFacade(UserCommandService userCommandService,
                           UserQueryService userQueryService) {
     this.userCommandService = userCommandService;

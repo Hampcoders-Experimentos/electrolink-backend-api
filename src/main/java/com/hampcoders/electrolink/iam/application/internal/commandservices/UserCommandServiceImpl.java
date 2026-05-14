@@ -14,8 +14,8 @@ import org.springframework.stereotype.Service;
 
 /**
  * User command service implementation.
- * <p>
- * This class implements the {@link UserCommandService} interface and provides the implementation
+ *
+ * <p>This class implements the {@link UserCommandService} interface and provides the implementation
  * for the {@link SignInCommand} and {@link SignUpCommand} commands.
  * </p>
  */
@@ -46,8 +46,9 @@ public class UserCommandServiceImpl implements UserCommandService {
 
   /**
    * Handles the sign-in command.
-   * <p>
-   * This method handles the {@link SignInCommand} command and returns the user and the token.
+   *
+   * <p>This method handles the {@link SignInCommand} command and
+   * returns the user and the token.
    * </p>
    *
    * @param command the sign-in command containing the username and password
@@ -70,8 +71,8 @@ public class UserCommandServiceImpl implements UserCommandService {
 
   /**
    * Handles the sign-up command.
-   * <p>
-   * This method handles the {@link SignUpCommand} command and returns the user.
+   *
+   * <p>This method handles the {@link SignUpCommand} command and returns the user.
    * </p>
    *
    * @param command the sign-up command containing the username and password

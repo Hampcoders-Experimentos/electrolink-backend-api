@@ -19,6 +19,11 @@ public class ServiceOperationQueryServiceImpl implements ServiceOperationQuerySe
 
   private final ServiceOperationRepository serviceOperationRepository;
 
+  /**
+   * Constructor for ServiceOperationQueryServiceImpl.
+   *
+   * @param serviceOperationRepository The repository for accessing ServiceOperation data.
+   */
   public ServiceOperationQueryServiceImpl(ServiceOperationRepository serviceOperationRepository) {
     this.serviceOperationRepository = serviceOperationRepository;
   }

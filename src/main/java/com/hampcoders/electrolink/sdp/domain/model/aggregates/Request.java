@@ -1,9 +1,9 @@
 package com.hampcoders.electrolink.sdp.domain.model.aggregates;
 
-import com.hampcoders.electrolink.sdp.domain.model.entities.Bill;
-import com.hampcoders.electrolink.sdp.domain.model.entities.Photo;
 import com.hampcoders.electrolink.sdp.domain.model.commands.CreateRequestCommand;
 import com.hampcoders.electrolink.sdp.domain.model.commands.UpdateRequestCommand;
+import com.hampcoders.electrolink.sdp.domain.model.entities.Bill;
+import com.hampcoders.electrolink.sdp.domain.model.entities.Photo;
 import com.hampcoders.electrolink.sdp.domain.model.events.RequestCreatedEvent;
 import com.hampcoders.electrolink.shared.domain.model.aggregates.AuditableAbstractAggregateRoot;
 import jakarta.persistence.AttributeOverride;
@@ -48,9 +48,17 @@ public class Request extends AuditableAbstractAggregateRoot<Request> {
   @JoinColumn(name = "request_id")
   private List<Photo> photos = new ArrayList<>();
 
+  /**
+   * Default constructor for JPA.
+   */
   protected Request() {
   }
 
+  /**
+   * Constructs a new Request aggregate from the given CreateRequestCommand.
+   *
+   * @param command the command containing the request details
+   */
   public Request(final CreateRequestCommand command) {
     this.clientId = command.clientId();
     this.technicianId = command.technicianId();
@@ -63,6 +71,11 @@ public class Request extends AuditableAbstractAggregateRoot<Request> {
     this.isPriority = command.isPriority();
   }
 
+  /**
+   * Updates the Request aggregate with the details from the given UpdateRequestCommand.
+   *
+   * @param command the command containing the updated request details
+   */
   public void updateFrom(final UpdateRequestCommand command) {
     this.clientId = command.clientId();
     this.technicianId = command.technicianId();
@@ -78,16 +91,21 @@ public class Request extends AuditableAbstractAggregateRoot<Request> {
     }
   }
 
+  /**
+   * Assigns a technician to this request.
+   *
+   * @param technicianId the ID of the technician to assign
+   */
   public void assignTechnician(String technicianId) {
     this.technicianId = technicianId;
   }
 
+  /**
+   * Registers a RequestCreatedEvent to indicate that a new request has been created.
+   */
   public void registerCreatedEvent() {
     registerEvent(new RequestCreatedEvent(this.getId(), Long.valueOf(this.clientId),
         this.serviceId, this.isPriority, this.propertyId));
   }
 
-  public boolean isPriority() {
-    return isPriority;
-  }
 }

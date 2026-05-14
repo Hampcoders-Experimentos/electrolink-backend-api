@@ -42,6 +42,14 @@ public class ServiceOperationsController {
   private final ServiceOperationCommandService commandService;
   private final ServiceOperationQueryService queryService;
 
+  /**
+   * Constructor for ServiceOperationsController,
+   * injecting the necessary command and query services.
+   *
+   * @param commandService The service responsible for handling
+   *     commands related to service operations.
+   * @param queryService The service responsible for handling queries related to service operations.
+   */
   public ServiceOperationsController(ServiceOperationCommandService commandService,
                                      ServiceOperationQueryService queryService) {
     this.commandService = commandService;
