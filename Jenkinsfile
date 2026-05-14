@@ -6,28 +6,55 @@ pipeline {
 	}
 
 	stages {
-		stage ('Compile Stage') {
-			steps {
-				withMaven(maven: 'Maven_3.9.11') {
-					bat 'mvn clean compile -Dcheckstyle.skip=true'
-				}
-			}
-		}
+        stage ('Compile Project') {
+          steps {
+            withMaven(maven : 'MAVEN_3_9_11') {
+                sh 'mvn clean compile'
+            }
+          }
+        }
 
-		stage ('Testing Stage') {
-			steps {
-				withMaven(maven : 'Maven_3.9.11') {
-					bat 'mvn test -Dcheckstyle.skip=true'
-				}
-			}
-		}
+        stage('Validate Checkstyle') {
+          steps {
+            withMaven(maven: 'MAVEN_3_9_11') {
+              sh 'mvn checkstyle:check'
+            }
+          }
+        }
 
-		stage ('package Stage') {
-			steps {
-				withMaven(maven : 'Maven_3.9.11') {
-					bat 'mvn package -Dcheckstyle.skip=true'
-				}
-			}
-		}
-	}
+        stage('Validate Unit Tests') {
+          steps {
+            withMaven(maven: 'MAVEN_3_9_11') {
+              sh 'mvn test'
+            }
+          }
+        }
+
+        stage('Validate Test Coverage') {
+          steps {
+            withMaven(maven: 'MAVEN_3_9_11') {
+              sh 'mvn clean verify jacoco:report'
+              sh 'mvn jacoco:check'
+            }
+          }
+        }
+
+    	 /*stage ('SonarQube Analysis') {
+            steps {
+                withSonarQubeEnv('sonarLocal') {
+                    bat 'mvn clean verify sonar:sonar -Dsonar.projectKey=learning-center'
+                }
+            }
+         }*/
+
+        stage ('package Project') {
+            steps {
+                withMaven(maven : 'MAVEN_3_9_11') {
+                    sh 'mvn package'
+                }
+            }
+        }
+
+
+    }
 }
