@@ -21,8 +21,6 @@ Pruebas para el servicio de comandos de perfiles (`ProfileCommandServiceImpl`). 
 
 ## 2. Query Services (`application/internal/queryservices`)
 
-*(Pruebas añadidas recientemente para garantizar la cobertura total de la capa de aplicación).*
-
 ### `ProfileQueryServiceImplTest`
 Pruebas para el servicio de consultas de perfiles (`ProfileQueryServiceImpl`).
 *   **`handleGetAllProfiles_ShouldReturnList`**: Verifica que la consulta devuelva la lista con todos los perfiles registrados en el sistema.
