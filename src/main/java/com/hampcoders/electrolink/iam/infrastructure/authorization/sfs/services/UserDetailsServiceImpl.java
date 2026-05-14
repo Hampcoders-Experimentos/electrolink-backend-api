@@ -16,6 +16,14 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
   private final UserRepository userRepository;
 
+  /**
+   * User Details Service Implementation constructor.
+   *
+   * @param userRepository The User Repository to access the user data from the database.
+   *     It is injected by Spring's dependency injection mechanism.
+   *     The UserRepository is responsible for performing CRUD operations on the User entity.
+   *     It provides methods to find a user by username, save a user, delete a user, etc.
+   */
   public UserDetailsServiceImpl(UserRepository userRepository) {
     this.userRepository = userRepository;
   }
