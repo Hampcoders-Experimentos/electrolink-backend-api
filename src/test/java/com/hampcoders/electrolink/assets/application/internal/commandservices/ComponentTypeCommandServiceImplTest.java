@@ -3,6 +3,7 @@ package com.hampcoders.electrolink.assets.application.internal.commandservices;
 import com.hampcoders.electrolink.assets.domain.model.aggregates.ComponentType;
 import com.hampcoders.electrolink.assets.domain.model.commands.CreateComponentTypeCommand;
 import com.hampcoders.electrolink.assets.domain.model.commands.DeleteComponentTypeCommand;
+import com.hampcoders.electrolink.assets.domain.model.commands.UpdateComponentTypeCommand;
 import com.hampcoders.electrolink.assets.domain.model.valueobjects.ComponentTypeId;
 import com.hampcoders.electrolink.assets.infrastructure.persistence.jpa.repositories.ComponentRepository;
 import com.hampcoders.electrolink.assets.infrastructure.persistence.jpa.repositories.ComponentTypeRepository;
@@ -12,6 +13,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -141,5 +144,29 @@ class ComponentTypeCommandServiceImplTest {
         verify(componentRepository, never()).existsByComponentTypeId(any());
         verify(componentTypeRepository, never()).deleteById(any());
         verifyNoMoreInteractions(componentTypeRepository);
+    }
+
+    @Test
+    @DisplayName("handle(UpdateCommand) should update component type and return it when found (AAA)")
+    void handleUpdateCommand_ShouldUpdateComponentType_WhenFound() {
+        // ARRANGE
+        Long typeId = 1L;
+        String newName = "Updated Name";
+        String newDesc = "Updated Desc";
+        UpdateComponentTypeCommand command = new UpdateComponentTypeCommand(typeId, newName, newDesc);
+
+        ComponentType mockType = mock(ComponentType.class);
+        when(componentTypeRepository.findById(typeId)).thenReturn(Optional.of(mockType));
+        when(componentTypeRepository.save(mockType)).thenReturn(mockType);
+
+        // ACT
+        Optional<ComponentType> result = service.handle(command);
+
+        // ASSERT
+        assertTrue(result.isPresent());
+        verify(componentTypeRepository, times(1)).findById(typeId);
+        verify(mockType, times(1)).updateName(command);
+        verify(componentTypeRepository, times(1)).save(mockType);
+        verifyNoMoreInteractions(componentTypeRepository, mockType);
     }
 }
