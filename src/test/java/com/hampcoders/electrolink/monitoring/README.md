@@ -19,8 +19,6 @@ Se han verificado las pruebas unitarias para los siguientes servicios de consult
 
 ## 3. Event Handlers (`application/internal/eventhandlers`)
 
-*(Pruebas añadidas recientemente para garantizar el 100% de cobertura en la capa de aplicación).*
-
 Se han implementado pruebas completas para los manejadores de eventos (handlers) que reaccionan a eventos de dominio (como `ServiceCompletedEvent`).
 
 ### `MutualEvaluationTriggerHandlerTest`
