@@ -1,4 +1,4 @@
-package com.hampcoders.electrolink.shared.configuration;
+package com.hampcoders.electrolink.shared.infrastructure.documentation.openapi.cors;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
