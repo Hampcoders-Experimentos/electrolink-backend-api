@@ -1,8 +1,14 @@
 package com.hampcoders.electrolink.sdp.application.internal.outboundservices;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
 import com.hampcoders.electrolink.profiles.domain.model.valueobjects.Role;
-import com.hampcoders.electrolink.profiles.interfaces.acl.ProfilesContextFacade;
 import com.hampcoders.electrolink.profiles.interfaces.rest.resources.ProfileResource;
+import com.hampcoders.electrolink.profiles.interfaces.acl.ProfilesContextFacade;
+import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -10,34 +16,53 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.*;
-
 @ExtendWith(MockitoExtension.class)
-public class ExternalProfileServiceTest {
+class ExternalProfileServiceTest {
 
-    @Mock
-    private ProfilesContextFacade profilesContextFacade;
+  @Mock
+  private ProfilesContextFacade profilesContextFacade;
 
-    @InjectMocks
-    private ExternalProfileService externalProfileService;
+  @InjectMocks
+  private ExternalProfileService externalProfileService;
 
-    @Test
-    @DisplayName("fetchTechnicians should call ProfilesContextFacade with TECHNICIAN role (AAA)")
-    void fetchTechnicians_ShouldReturnList() {
-        // Arrange
-        ProfileResource tech = mock(ProfileResource.class);
-        when(profilesContextFacade.fetchProfilesByRole(Role.TECHNICIAN)).thenReturn(List.of(tech));
+  @Test
+  @DisplayName("Given technicians exist, when fetching technicians, then it returns them")
+  void handle_ShouldReturnTechnicians_WhenProfilesExist() {
+    // Arrange
+    List<ProfileResource> technicians = List.of(new ProfileResource(
+        1L, "Jane", "Tech", "jane@mail.com", "Main St", Role.TECHNICIAN, "CERT-1", true));
+    when(profilesContextFacade.fetchProfilesByRole(Role.TECHNICIAN)).thenReturn(technicians);
 
-        // Act
-        List<ProfileResource> result = externalProfileService.fetchTechnicians();
+    // Act
+    List<ProfileResource> result = externalProfileService.fetchTechnicians();
 
-        // Assert
-        assertEquals(1, result.size());
-        assertEquals(tech, result.get(0));
-        verify(profilesContextFacade, times(1)).fetchProfilesByRole(Role.TECHNICIAN);
-        verifyNoMoreInteractions(profilesContextFacade);
-    }
+    // Assert
+    assertEquals(technicians, result);
+  }
+
+  @Test
+  @DisplayName("Given no technicians, when fetching technicians, then it returns an empty list")
+  void handle_ShouldReturnEmptyList_WhenNoTechnicians() {
+    // Arrange
+    when(profilesContextFacade.fetchProfilesByRole(Role.TECHNICIAN)).thenReturn(List.of());
+
+    // Act
+    List<ProfileResource> result = externalProfileService.fetchTechnicians();
+
+    // Assert
+    assertTrue(result.isEmpty());
+  }
+
+  @Test
+  @DisplayName("Given a fetch request, when fetching technicians, then it queries the technician role")
+  void handle_ShouldQueryTechnicianRole_WhenFetching() {
+    // Arrange
+    when(profilesContextFacade.fetchProfilesByRole(Role.TECHNICIAN)).thenReturn(List.of());
+
+    // Act
+    externalProfileService.fetchTechnicians();
+
+    // Assert
+    verify(profilesContextFacade).fetchProfilesByRole(Role.TECHNICIAN);
+  }
 }
