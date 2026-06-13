@@ -1,4 +1,4 @@
-package com.hampcoders.electrolink.shared.application.internal.services;
+package com.hampcoders.electrolink.iam.infrastructure.authorization.sfs.services;
 
 import com.hampcoders.electrolink.iam.infrastructure.authorization.sfs.model.UserDetailsImpl;
 import java.util.Optional;

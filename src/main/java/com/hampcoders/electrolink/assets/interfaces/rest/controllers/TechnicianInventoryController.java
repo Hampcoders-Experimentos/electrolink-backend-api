@@ -18,7 +18,7 @@ import com.hampcoders.electrolink.assets.interfaces.rest.transform.AddComponentS
 import com.hampcoders.electrolink.assets.interfaces.rest.transform.ComponentStockResourceFromEntityAssembler;
 import com.hampcoders.electrolink.assets.interfaces.rest.transform.TechnicianInventoryResourceFromEntityAssembler;
 import com.hampcoders.electrolink.assets.interfaces.rest.transform.UpdateComponentStockCommandFromResourceAssembler;
-import com.hampcoders.electrolink.shared.application.internal.services.AuthenticatedUserService;
+import com.hampcoders.electrolink.iam.infrastructure.authorization.sfs.services.AuthenticatedUserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
