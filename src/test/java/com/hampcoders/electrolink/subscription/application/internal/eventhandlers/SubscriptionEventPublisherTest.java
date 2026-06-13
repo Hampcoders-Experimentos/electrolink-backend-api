@@ -1,33 +1,41 @@
 package com.hampcoders.electrolink.subscription.application.internal.eventhandlers;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
 import com.hampcoders.electrolink.subscription.domain.model.events.SubscriptionActivatedEvent;
+import com.hampcoders.electrolink.subscription.domain.model.valueobjects.PlanType;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.junit.jupiter.MockitoExtension;
 
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.mockito.Mockito.*;
+class SubscriptionEventPublisherTest {
 
-@ExtendWith(MockitoExtension.class)
-public class SubscriptionEventPublisherTest {
+  private final SubscriptionEventPublisher publisher = new SubscriptionEventPublisher();
 
-    @InjectMocks
-    private SubscriptionEventPublisher publisher;
+  @Test
+  @DisplayName("Given a valid event, when handling subscription activated, then it completes without error")
+  void handle_ShouldComplete_WhenEventReceived() {
+    // Arrange
+    SubscriptionActivatedEvent event = new SubscriptionActivatedEvent(2L, 1L, PlanType.PREMIUM);
 
-    @Test
-    @DisplayName("onSubscriptionActivated should execute without exceptions (AAA)")
-    void onSubscriptionActivated_ShouldExecuteSuccessfully() {
-        // Arrange
-        SubscriptionActivatedEvent event = mock(SubscriptionActivatedEvent.class);
-        when(event.userId()).thenReturn(1L);
-        when(event.planId()).thenReturn(2L);
-        when(event.planName()).thenReturn(com.hampcoders.electrolink.subscription.domain.model.valueobjects.PlanType.PREMIUM);
+    // Act & Assert
+    assertDoesNotThrow(() -> publisher.onSubscriptionActivated(event));
+  }
 
-        // Act & Assert
-        // Como este event handler solo imprime un log y no tiene dependencias inyectadas,
-        // simplemente verificamos que la ejecución se complete correctamente sin errores.
-        assertDoesNotThrow(() -> publisher.onSubscriptionActivated(event));
-    }
+  @Test
+  @DisplayName("Given an event with a null plan name, when handling subscription activated, then it completes without error")
+  void handle_ShouldComplete_WhenPlanNameIsNull() {
+    // Arrange
+    SubscriptionActivatedEvent event = new SubscriptionActivatedEvent(2L, 1L, null);
+
+    // Act & Assert
+    assertDoesNotThrow(() -> publisher.onSubscriptionActivated(event));
+  }
+
+  @Test
+  @DisplayName("Given a null event, when handling subscription activated, then it throws NullPointerException")
+  void handle_ShouldThrowNullPointer_WhenEventIsNull() {
+    // Act & Assert
+    assertThrows(NullPointerException.class, () -> publisher.onSubscriptionActivated(null));
+  }
 }

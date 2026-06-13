@@ -56,7 +56,7 @@ class ServiceCommandServiceImplTest {
   void handle_ShouldThrow_WhenUpdatingMissingService() {
     // Arrange
     UpdateServiceCommand command = new UpdateServiceCommand(
-        10L, null, null, null, null, null, false, null, null, null, null);
+        10L, null, null, null, null, null, false, null, null, null, null, null);
     when(serviceRepository.findById(10L)).thenReturn(Optional.empty());
 
     // Act & Assert

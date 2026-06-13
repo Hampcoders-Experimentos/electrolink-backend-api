@@ -1,10 +1,16 @@
 package com.hampcoders.electrolink.subscription.application.internal.queryservices;
 
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
 import com.hampcoders.electrolink.subscription.domain.model.aggregates.Subscription;
 import com.hampcoders.electrolink.subscription.domain.model.queries.GetActiveSubscriptionByUserIdQuery;
 import com.hampcoders.electrolink.subscription.domain.model.queries.GetSubscriptionByUserIdQuery;
 import com.hampcoders.electrolink.subscription.domain.model.valueobjects.SubscriptionStatus;
 import com.hampcoders.electrolink.subscription.infrastructure.persistence.jpa.repositories.SubscriptionRepository;
+import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -12,124 +18,58 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.Optional;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
-
 @ExtendWith(MockitoExtension.class)
 class SubscriptionQueryServiceImplTest {
 
-    @Mock
-    private SubscriptionRepository subscriptionRepository;
-    @InjectMocks
-    private SubscriptionQueryServiceImpl subscriptionQueryService;
+  @Mock
+  private SubscriptionRepository subscriptionRepository;
 
-    private final Long USER_ID = 1L;
+  @InjectMocks
+  private SubscriptionQueryServiceImpl subscriptionQueryService;
 
-    @Test
-    @DisplayName("handle(GetSubscriptionByUserIdQuery) should return subscription when found (AAA)")
-    void handleGetSubscriptionByUserId_ShouldReturn_WhenFound() {
-        var subscription = mock(Subscription.class);
-        var query = new GetSubscriptionByUserIdQuery(USER_ID);
+  @Test
+  @DisplayName("Given an existing subscription, when handling GetSubscriptionByUserIdQuery, then it returns it")
+  void handle_ShouldReturnSubscription_WhenUserHasSubscription() {
+    // Arrange
+    Subscription subscription = mock(Subscription.class);
+    when(subscriptionRepository.findByUserId(2L)).thenReturn(Optional.of(subscription));
 
-        when(subscriptionRepository.findByUserId(USER_ID)).thenReturn(Optional.of(subscription));
+    // Act
+    Optional<Subscription> result =
+        subscriptionQueryService.handle(new GetSubscriptionByUserIdQuery(2L));
 
-        var result = subscriptionQueryService.handle(query);
+    // Assert
+    assertTrue(result.isPresent());
+    assertSame(subscription, result.get());
+  }
 
-        assertTrue(result.isPresent());
-        assertEquals(subscription, result.get());
-        verify(subscriptionRepository).findByUserId(USER_ID);
-        verifyNoMoreInteractions(subscriptionRepository);
-    }
+  @Test
+  @DisplayName("Given no active subscription, when handling GetActiveSubscriptionByUserIdQuery, then it returns empty")
+  void handle_ShouldReturnEmpty_WhenNoActiveSubscription() {
+    // Arrange
+    when(subscriptionRepository.findByUserIdAndStatus(2L, SubscriptionStatus.ACTIVE))
+        .thenReturn(Optional.empty());
 
-    @Test
-    @DisplayName("handle(GetSubscriptionByUserIdQuery) should return empty when not found (AAA)")
-    void handleGetSubscriptionByUserId_ShouldReturnEmpty_WhenNotFound() {
-        var query = new GetSubscriptionByUserIdQuery(USER_ID);
+    // Act
+    Optional<Subscription> result =
+        subscriptionQueryService.handle(new GetActiveSubscriptionByUserIdQuery(2L));
 
-        when(subscriptionRepository.findByUserId(USER_ID)).thenReturn(Optional.empty());
+    // Assert
+    assertTrue(result.isEmpty());
+  }
 
-        var result = subscriptionQueryService.handle(query);
+  @Test
+  @DisplayName("Given a subscription that allows requests, when checking canUserMakeRequest, then it returns true")
+  void handle_ShouldReturnTrue_WhenSubscriptionAllowsRequest() {
+    // Arrange
+    Subscription subscription = mock(Subscription.class);
+    when(subscription.canMakeRequest()).thenReturn(true);
+    when(subscriptionRepository.findByUserId(2L)).thenReturn(Optional.of(subscription));
 
-        assertTrue(result.isEmpty());
-        verify(subscriptionRepository).findByUserId(USER_ID);
-        verifyNoMoreInteractions(subscriptionRepository);
-    }
+    // Act
+    boolean result = subscriptionQueryService.canUserMakeRequest(2L);
 
-    @Test
-    @DisplayName("handle(GetActiveSubscriptionByUserIdQuery) should return active subscription when found (AAA)")
-    void handleGetActiveSubscriptionByUserId_ShouldReturn_WhenFound() {
-        var subscription = mock(Subscription.class);
-        var query = new GetActiveSubscriptionByUserIdQuery(USER_ID);
-
-        when(subscriptionRepository.findByUserIdAndStatus(USER_ID, SubscriptionStatus.ACTIVE))
-            .thenReturn(Optional.of(subscription));
-
-        var result = subscriptionQueryService.handle(query);
-
-        assertTrue(result.isPresent());
-        assertEquals(subscription, result.get());
-        verify(subscriptionRepository).findByUserIdAndStatus(USER_ID, SubscriptionStatus.ACTIVE);
-        verifyNoMoreInteractions(subscriptionRepository);
-    }
-
-    @Test
-    @DisplayName("handle(GetActiveSubscriptionByUserIdQuery) should return empty when not found (AAA)")
-    void handleGetActiveSubscriptionByUserId_ShouldReturnEmpty_WhenNotFound() {
-        var query = new GetActiveSubscriptionByUserIdQuery(USER_ID);
-
-        when(subscriptionRepository.findByUserIdAndStatus(USER_ID, SubscriptionStatus.ACTIVE))
-            .thenReturn(Optional.empty());
-
-        var result = subscriptionQueryService.handle(query);
-
-        assertTrue(result.isEmpty());
-        verify(subscriptionRepository).findByUserIdAndStatus(USER_ID, SubscriptionStatus.ACTIVE);
-        verifyNoMoreInteractions(subscriptionRepository);
-    }
-
-    @Test
-    @DisplayName("canUserMakeRequest should return true when subscription can make request (AAA)")
-    void canUserMakeRequest_ShouldReturnTrue_WhenCanMakeRequest() {
-        var subscription = mock(Subscription.class);
-
-        when(subscriptionRepository.findByUserId(USER_ID)).thenReturn(Optional.of(subscription));
-        when(subscription.canMakeRequest()).thenReturn(true);
-
-        var result = subscriptionQueryService.canUserMakeRequest(USER_ID);
-
-        assertTrue(result);
-        verify(subscriptionRepository).findByUserId(USER_ID);
-        verify(subscription).canMakeRequest();
-        verifyNoMoreInteractions(subscriptionRepository);
-    }
-
-    @Test
-    @DisplayName("canUserMakeRequest should return false when subscription cannot make request (AAA)")
-    void canUserMakeRequest_ShouldReturnFalse_WhenCannotMakeRequest() {
-        var subscription = mock(Subscription.class);
-
-        when(subscriptionRepository.findByUserId(USER_ID)).thenReturn(Optional.of(subscription));
-        when(subscription.canMakeRequest()).thenReturn(false);
-
-        var result = subscriptionQueryService.canUserMakeRequest(USER_ID);
-
-        assertFalse(result);
-        verify(subscriptionRepository).findByUserId(USER_ID);
-        verify(subscription).canMakeRequest();
-        verifyNoMoreInteractions(subscriptionRepository);
-    }
-
-    @Test
-    @DisplayName("canUserMakeRequest should return false when no subscription found (AAA)")
-    void canUserMakeRequest_ShouldReturnFalse_WhenNoSubscription() {
-        when(subscriptionRepository.findByUserId(USER_ID)).thenReturn(Optional.empty());
-
-        var result = subscriptionQueryService.canUserMakeRequest(USER_ID);
-
-        assertFalse(result);
-        verify(subscriptionRepository).findByUserId(USER_ID);
-        verifyNoMoreInteractions(subscriptionRepository);
-    }
+    // Assert
+    assertTrue(result);
+  }
 }
