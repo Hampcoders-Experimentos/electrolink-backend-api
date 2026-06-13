@@ -8,11 +8,11 @@
 		<version>3.4.6</version>
 		<relativePath/> <!-- lookup parent from a repository -->
 	</parent>
-	<groupId>com.electrolink.platform</groupId>
+	<groupId>com.hampcoders.electrolink</groupId>
 	<artifactId>electrolink-platform</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>service-platform-parent</name>
-	<description>Parent project for the service platform application</description>
+	<name>electrolink-platform</name>
+	<description>Project for Electrolink Backend API</description>
 	<url/>
 	<licenses>
 		<license/>
@@ -176,8 +176,8 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.11.0</version> <!-- Or a compatible version -->
                 <configuration>
-                    <source>24</source>
-                    <target>24</target>
+                    <source>21</source>
+                    <target>21</target>
                     <annotationProcessorPaths>
                         <path>
                             <groupId>org.projectlombok</groupId>

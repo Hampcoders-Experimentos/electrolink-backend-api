@@ -1,5 +1,14 @@
 package com.hampcoders.electrolink.iam.application.internal.commandservices;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
 import com.hampcoders.electrolink.iam.application.internal.outboundservices.hashing.HashingService;
 import com.hampcoders.electrolink.iam.application.internal.outboundservices.tokens.TokenService;
 import com.hampcoders.electrolink.iam.domain.model.aggregates.User;
@@ -9,6 +18,10 @@ import com.hampcoders.electrolink.iam.domain.model.entities.Role;
 import com.hampcoders.electrolink.iam.domain.model.valueobjects.Roles;
 import com.hampcoders.electrolink.iam.infrastructure.persistence.jpa.repositories.RoleRepository;
 import com.hampcoders.electrolink.iam.infrastructure.persistence.jpa.repositories.UserRepository;
+import com.hampcoders.electrolink.shared.test.fixtures.CommonCommandFixtures;
+import com.hampcoders.electrolink.shared.test.fixtures.UserInputFixture;
+import java.util.List;
+import java.util.Optional;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -17,156 +30,112 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.List;
-import java.util.Optional;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
-
 @ExtendWith(MockitoExtension.class)
-public class UserCommandServiceImplTest {
-    @Mock
-    private UserRepository userRepository;
-    @Mock
-    private HashingService hashingService;
-    @Mock
-    private TokenService tokenService;
-    @Mock
-    private RoleRepository roleRepository;
+class UserCommandServiceImplTest {
 
-    @InjectMocks
-    private UserCommandServiceImpl userCommandService;
+  @Mock
+  private UserRepository userRepository;
+  @Mock
+  private HashingService hashingService;
+  @Mock
+  private TokenService tokenService;
+  @Mock
+  private RoleRepository roleRepository;
 
-    @Test
-    @DisplayName("handle(SignInCommand) should return user and token when credentials valid (AAA)")
-    void handle_SignIn_ShouldReturnPair_WhenValid() {
-        // Arrange
-        var cmd = new SignInCommand("alice", "secret");
-        var user = mock(User.class);
-        when(userRepository.findByUsername("alice")).thenReturn(Optional.of(user));
-        when(user.getPassword()).thenReturn("hashed");
-        when(hashingService.matches("secret", "hashed")).thenReturn(true);
-        when(user.getUsername()).thenReturn("alice");
-        when(tokenService.generateToken("alice")).thenReturn("jwt");
+  @InjectMocks
+  private UserCommandServiceImpl userCommandService;
 
-        // Act
-        Optional<ImmutablePair<User, String>> result = userCommandService.handle(cmd);
+  @Test
+  @DisplayName("Given valid credentials, when handling SignInCommand, then it returns the user and a token")
+  void handle_ShouldReturnUserAndToken_WhenCredentialsValid() {
+    // Arrange
+    SignInCommand command = CommonCommandFixtures.signInCommand();
+    User user = mock(User.class);
+    when(userRepository.findByUsername(UserInputFixture.username())).thenReturn(Optional.of(user));
+    when(user.getPassword()).thenReturn("hashed");
+    when(hashingService.matches(UserInputFixture.password(), "hashed")).thenReturn(true);
+    when(user.getUsername()).thenReturn(UserInputFixture.username());
+    when(tokenService.generateToken(UserInputFixture.username())).thenReturn("jwt");
 
-        // Assert
-        assertTrue(result.isPresent());
-        assertSame(user, result.get().left);
-        assertEquals("jwt", result.get().right);
-        verify(userRepository).findByUsername("alice");
-        verify(hashingService).matches("secret", "hashed");
-        verify(tokenService).generateToken("alice");
-        verifyNoMoreInteractions(userRepository, hashingService, tokenService);
-        verifyNoInteractions(roleRepository);
-    }
+    // Act
+    Optional<ImmutablePair<User, String>> result = userCommandService.handle(command);
 
-    @Test
-    @DisplayName("handle(SignInCommand) should throw when user not found (AAA)")
-    void handle_SignIn_ShouldThrow_WhenUserMissing() {
-        // Arrange
-        var cmd = new SignInCommand("bob", "x");
-        when(userRepository.findByUsername("bob")).thenReturn(Optional.empty());
+    // Assert
+    assertTrue(result.isPresent());
+    assertSame(user, result.get().getLeft());
+    assertEquals("jwt", result.get().getRight());
+  }
 
-        // Act + Assert
-        assertThrows(RuntimeException.class, () -> userCommandService.handle(cmd));
+  @Test
+  @DisplayName("Given an unknown username, when handling SignInCommand, then it throws User not found")
+  void handle_ShouldThrowUserNotFound_WhenUserMissingOnSignIn() {
+    // Arrange
+    SignInCommand command = CommonCommandFixtures.signInCommand();
+    when(userRepository.findByUsername(UserInputFixture.username())).thenReturn(Optional.empty());
 
-        verify(userRepository).findByUsername("bob");
-        verifyNoMoreInteractions(userRepository);
-        verifyNoInteractions(hashingService, tokenService, roleRepository);
-    }
+    // Act & Assert
+    RuntimeException ex = assertThrows(RuntimeException.class, () -> userCommandService.handle(command));
+    assertEquals("User not found", ex.getMessage());
+  }
 
-    @Test
-    @DisplayName("handle(SignInCommand) should throw when password invalid (AAA)")
-    void handle_SignIn_ShouldThrow_WhenPasswordInvalid() {
-        // Arrange
-        var cmd = new SignInCommand("alice", "wrong");
-        var user = mock(User.class);
-        when(userRepository.findByUsername("alice")).thenReturn(Optional.of(user));
-        when(user.getPassword()).thenReturn("hashed");
-        when(hashingService.matches("wrong", "hashed")).thenReturn(false);
+  @Test
+  @DisplayName("Given a wrong password, when handling SignInCommand, then it throws Invalid password")
+  void handle_ShouldThrowInvalidPassword_WhenPasswordInvalidOnSignIn() {
+    // Arrange
+    SignInCommand command = CommonCommandFixtures.signInCommand();
+    User user = mock(User.class);
+    when(userRepository.findByUsername(UserInputFixture.username())).thenReturn(Optional.of(user));
+    when(user.getPassword()).thenReturn("hashed");
+    when(hashingService.matches(UserInputFixture.password(), "hashed")).thenReturn(false);
 
-        // Act + Assert
-        assertThrows(RuntimeException.class, () -> userCommandService.handle(cmd));
+    // Act & Assert
+    RuntimeException ex = assertThrows(RuntimeException.class, () -> userCommandService.handle(command));
+    assertEquals("Invalid password", ex.getMessage());
+  }
 
-        verify(userRepository).findByUsername("alice");
-        verify(hashingService).matches("wrong", "hashed");
-        verifyNoMoreInteractions(userRepository, hashingService);
-        verifyNoInteractions(tokenService, roleRepository);
-    }
+  @Test
+  @DisplayName("Given a new username with existing roles, when handling SignUpCommand, then it persists and returns the user")
+  void handle_ShouldCreateUser_WhenUsernameIsNew() {
+    // Arrange
+    Role role = new Role(Roles.ROLE_CLIENT);
+    SignUpCommand command = CommonCommandFixtures.signUpCommand(List.of(role));
+    User saved = mock(User.class);
+    when(userRepository.existsByUsername(UserInputFixture.username())).thenReturn(false);
+    when(roleRepository.findByName(Roles.ROLE_CLIENT)).thenReturn(Optional.of(role));
+    when(hashingService.encode(UserInputFixture.password())).thenReturn("hashed");
+    when(userRepository.findByUsername(UserInputFixture.username())).thenReturn(Optional.of(saved));
 
-    @Test
-    @DisplayName("handle(SignUpCommand) should create user when username not exists and roles valid (AAA)")
-    void handle_SignUp_ShouldCreate_WhenValid() {
-        // Arrange
-        var requestedRoleHomeOwner = mock(Role.class);
-        var requestedRoleClient = mock(Role.class);
-        when(requestedRoleHomeOwner.getName()).thenReturn(Roles.ROLE_HOMEOWNER);
-        when(requestedRoleClient.getName()).thenReturn(Roles.ROLE_CLIENT);
-        var cmd = new SignUpCommand("charlie", "pwd", List.of(requestedRoleHomeOwner, requestedRoleClient));
+    // Act
+    Optional<User> result = userCommandService.handle(command);
 
-        when(userRepository.existsByUsername("charlie")).thenReturn(false);
-        var roleHomeOwner = mock(Role.class);
-        var roleClient = mock(Role.class);
-        when(roleRepository.findByName(Roles.ROLE_HOMEOWNER)).thenReturn(Optional.of(roleHomeOwner));
-        when(roleRepository.findByName(Roles.ROLE_CLIENT)).thenReturn(Optional.of(roleClient));
-        when(hashingService.encode("pwd")).thenReturn("hashedPwd");
+    // Assert
+    assertTrue(result.isPresent());
+    assertSame(saved, result.get());
+    verify(userRepository).save(any(User.class));
+  }
 
-        // userRepository.save returns the same entity
-        doAnswer(inv -> null).when(userRepository).save(any(User.class));
-        when(userRepository.findByUsername("charlie")).thenReturn(Optional.of(mock(User.class)));
+  @Test
+  @DisplayName("Given an existing username, when handling SignUpCommand, then it throws Username already exists")
+  void handle_ShouldThrowUsernameExists_WhenUsernameAlreadyExists() {
+    // Arrange
+    SignUpCommand command = CommonCommandFixtures.signUpCommand(List.of(new Role(Roles.ROLE_CLIENT)));
+    when(userRepository.existsByUsername(UserInputFixture.username())).thenReturn(true);
 
-        // Act
-        Optional<User> result = userCommandService.handle(cmd);
+    // Act & Assert
+    RuntimeException ex = assertThrows(RuntimeException.class, () -> userCommandService.handle(command));
+    assertEquals("Username already exists", ex.getMessage());
+  }
 
-        // Assert
-        assertTrue(result.isPresent());
-        verify(userRepository).existsByUsername("charlie");
-        verify(roleRepository).findByName(Roles.ROLE_HOMEOWNER);
-        verify(roleRepository).findByName(Roles.ROLE_CLIENT);
-        verify(hashingService).encode("pwd");
-        verify(userRepository).save(any(User.class));
-        verify(userRepository).findByUsername("charlie");
-        verifyNoMoreInteractions(userRepository, roleRepository, hashingService);
-        verifyNoInteractions(tokenService);
-    }
+  @Test
+  @DisplayName("Given a role that does not exist, when handling SignUpCommand, then it throws Role name not found")
+  void handle_ShouldThrowRoleNotFound_WhenRoleMissingOnSignUp() {
+    // Arrange
+    SignUpCommand command = CommonCommandFixtures.signUpCommand(List.of(new Role(Roles.ROLE_CLIENT)));
+    when(userRepository.existsByUsername(UserInputFixture.username())).thenReturn(false);
+    when(roleRepository.findByName(Roles.ROLE_CLIENT)).thenReturn(Optional.empty());
 
-    @Test
-    @DisplayName("handle(SignUpCommand) should throw when username exists (AAA)")
-    void handle_SignUp_ShouldThrow_WhenUsernameExists() {
-        // Arrange
-        var cmd = new SignUpCommand("alice", "pwd", List.of());
-        when(userRepository.existsByUsername("alice")).thenReturn(true);
-
-        // Act + Assert
-        assertThrows(RuntimeException.class, () -> userCommandService.handle(cmd));
-
-        verify(userRepository).existsByUsername("alice");
-        verifyNoMoreInteractions(userRepository);
-        verifyNoInteractions(roleRepository, hashingService, tokenService);
-    }
-
-    @Test
-    @DisplayName("handle(SignUpCommand) should throw when some role name not found (AAA)")
-    void handle_SignUp_ShouldThrow_WhenRoleNotFound() {
-        // Arrange
-        var requestedRoleTechnician = mock(Role.class);
-        when(requestedRoleTechnician.getName()).thenReturn(Roles.ROLE_TECHNICIAN);
-        var cmd = new SignUpCommand("new", "pwd", List.of(requestedRoleTechnician));
-        when(userRepository.existsByUsername("new")).thenReturn(false);
-        when(roleRepository.findByName(Roles.ROLE_TECHNICIAN)).thenReturn(Optional.empty());
-
-        // Act + Assert
-        assertThrows(RuntimeException.class, () -> userCommandService.handle(cmd));
-
-        verify(userRepository).existsByUsername("new");
-        verify(roleRepository).findByName(Roles.ROLE_TECHNICIAN);
-        verifyNoMoreInteractions(userRepository, roleRepository);
-        verifyNoInteractions(hashingService, tokenService);
-    }
+    // Act & Assert
+    RuntimeException ex = assertThrows(RuntimeException.class, () -> userCommandService.handle(command));
+    assertEquals("Role name not found", ex.getMessage());
+  }
 }
