@@ -1,32 +1,58 @@
 package com.hampcoders.electrolink.monitoring.interfaces.rest.transform;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
+import com.hampcoders.electrolink.monitoring.domain.model.commands.AddPhotoCommand;
 import com.hampcoders.electrolink.monitoring.interfaces.rest.resources.CreateReportPhotoResource;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
+class CreateReportPhotoCommandFromResourceAssemblerTest {
 
-public class CreateReportPhotoCommandFromResourceAssemblerTest {
-    @Test
-    @DisplayName("toCommandFromResource should correctly map CreateReportPhotoResource to AddPhotoCommand (AAA)")
-    void toCommandFromResource_ShouldMapResourceToCommand() {
-        // Arrange
-        Long reportId = 42L;
-        byte[] photoData = new byte[]{1, 2, 3};
-        String fileName = "photo_xyz.jpg";
-        String contentType = "image/jpeg";
+  @Test
+  @DisplayName("Given a resource, when assembling, then it maps all photo fields")
+  void handle_ShouldMapAllFields_WhenResourceProvided() {
+    // Arrange
+    byte[] data = {1, 2, 3};
+    CreateReportPhotoResource resource =
+        new CreateReportPhotoResource(1L, data, "photo.png", "image/png");
 
-        var resource = new CreateReportPhotoResource(reportId, photoData, fileName, contentType);
+    // Act
+    AddPhotoCommand command =
+        CreateReportPhotoCommandFromResourceAssembler.toCommandFromResource(resource);
 
-        // Act
-        var command = CreateReportPhotoCommandFromResourceAssembler.toCommandFromResource(resource);
+    // Assert
+    assertEquals(1L, command.reportId());
+    assertArrayEquals(data, command.photoData());
+    assertEquals("photo.png", command.fileName());
+    assertEquals("image/png", command.contentType());
+  }
 
-        // Assert
-        assertNotNull(command, "El comando retornado no debe ser nulo.");
-        assertEquals(reportId, command.reportId(),
-                "El ReportId debe ser mapeado y envuelto en un Value Object.");
-        assertArrayEquals(photoData, command.photoData(), "El photoData debe coincidir.");
-        assertEquals(fileName, command.fileName(), "El fileName debe coincidir.");
-        assertEquals(contentType, command.contentType(), "El contentType debe coincidir.");
-    }
+  @Test
+  @DisplayName("Given different values, when assembling, then it maps the new values")
+  void handle_ShouldMapNewValues_WhenDifferentResourceProvided() {
+    // Arrange
+    byte[] data = {9, 9};
+    CreateReportPhotoResource resource =
+        new CreateReportPhotoResource(7L, data, "img.jpg", "image/jpeg");
+
+    // Act
+    AddPhotoCommand command =
+        CreateReportPhotoCommandFromResourceAssembler.toCommandFromResource(resource);
+
+    // Assert
+    assertEquals(7L, command.reportId());
+    assertEquals("img.jpg", command.fileName());
+    assertEquals("image/jpeg", command.contentType());
+  }
+
+  @Test
+  @DisplayName("Given a null resource, when assembling, then it throws NullPointerException")
+  void handle_ShouldThrowNullPointer_WhenResourceIsNull() {
+    // Act & Assert
+    assertThrows(NullPointerException.class,
+        () -> CreateReportPhotoCommandFromResourceAssembler.toCommandFromResource(null));
+  }
 }

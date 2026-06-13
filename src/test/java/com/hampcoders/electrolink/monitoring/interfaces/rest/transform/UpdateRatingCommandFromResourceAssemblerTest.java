@@ -1,33 +1,53 @@
 package com.hampcoders.electrolink.monitoring.interfaces.rest.transform;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
 import com.hampcoders.electrolink.monitoring.domain.model.commands.UpdateRatingCommand;
 import com.hampcoders.electrolink.monitoring.interfaces.rest.resources.UpdateRatingResource;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+class UpdateRatingCommandFromResourceAssemblerTest {
 
-public class UpdateRatingCommandFromResourceAssemblerTest {
-    @Test
-    @DisplayName("toCommandFromResource should correctly map UpdateRatingResource to UpdateRatingCommand (AAA)")
-    void toCommandFromResource_ShouldMapResourceToCommand() {
-        // Arrange
-        Long ratingId = 55L;
-        int score = 3;
-        String comment = "Needs immediate follow-up.";
+  @Test
+  @DisplayName("Given a resource, when assembling, then it maps id, score and comment")
+  void handle_ShouldMapAllFields_WhenResourceProvided() {
+    // Arrange
+    UpdateRatingResource resource = new UpdateRatingResource(50L, 4, "Good");
 
-        var resource = new UpdateRatingResource(ratingId, score, comment);
+    // Act
+    UpdateRatingCommand command =
+        UpdateRatingCommandFromResourceAssembler.toCommandFromResource(resource);
 
-        // Act
-        UpdateRatingCommand command = UpdateRatingCommandFromResourceAssembler.toCommandFromResource(resource);
+    // Assert
+    assertEquals(50L, command.ratingId());
+    assertEquals(4, command.score());
+    assertEquals("Good", command.comment());
+  }
 
-        // Assert
-        assertNotNull(command, "El comando retornado no debe ser nulo.");
+  @Test
+  @DisplayName("Given null score and comment, when assembling, then it maps the null values")
+  void handle_ShouldMapNulls_WhenScoreAndCommentAreNull() {
+    // Arrange
+    UpdateRatingResource resource = new UpdateRatingResource(50L, null, null);
 
-        assertEquals(ratingId, command.ratingId(),
-                "El RatingId debe ser mapeado y envuelto en un Value Object.");
-        assertEquals(score, command.score(), "El score de actualización debe coincidir.");
-        assertEquals(comment, command.comment(), "El comentario de actualización debe coincidir.");
-    }
+    // Act
+    UpdateRatingCommand command =
+        UpdateRatingCommandFromResourceAssembler.toCommandFromResource(resource);
+
+    // Assert
+    assertEquals(50L, command.ratingId());
+    assertNull(command.score());
+    assertNull(command.comment());
+  }
+
+  @Test
+  @DisplayName("Given a null resource, when assembling, then it throws NullPointerException")
+  void handle_ShouldThrowNullPointer_WhenResourceIsNull() {
+    // Act & Assert
+    assertThrows(NullPointerException.class,
+        () -> UpdateRatingCommandFromResourceAssembler.toCommandFromResource(null));
+  }
 }

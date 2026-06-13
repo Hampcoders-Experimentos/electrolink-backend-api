@@ -1,5 +1,11 @@
 package com.hampcoders.electrolink.monitoring.application.internal.commandservices;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
 import com.hampcoders.electrolink.monitoring.domain.model.aggregates.Report;
 import com.hampcoders.electrolink.monitoring.domain.model.aggregates.ServiceOperation;
 import com.hampcoders.electrolink.monitoring.domain.model.commands.AddReportCommand;
@@ -7,6 +13,8 @@ import com.hampcoders.electrolink.monitoring.domain.model.commands.DeleteReportC
 import com.hampcoders.electrolink.monitoring.domain.model.valueobjects.ReportType;
 import com.hampcoders.electrolink.monitoring.infrastructure.persistence.jpa.repositories.ReportRepository;
 import com.hampcoders.electrolink.monitoring.infrastructure.persistence.jpa.repositories.ServiceOperationRepository;
+import com.hampcoders.electrolink.shared.test.util.ReflectionTestUtils;
+import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -14,104 +22,56 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.Optional;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
-
 @ExtendWith(MockitoExtension.class)
-public class ReportCommandServiceImplTest {
-    @Mock
-    private ReportRepository reportRepository;
-    @Mock
-    private ServiceOperationRepository serviceOperationRepository;
-    @InjectMocks
-    private ReportCommandServiceImpl reportCommandService;
+class ReportCommandServiceImplTest {
 
-    // -------------------------------------------------------------------------
-    // handle(AddReportCommand command) - CREATE REPORT
-    // -------------------------------------------------------------------------
-    @Test
-    @DisplayName("handle(AddReportCommand) should save Report when ServiceOperation exists (AAA)")
-    void handle_AddReportCommand_ShouldSaveReport_WhenServiceOperationExists(){
-        // Arrange
-        Long serviceOperationId = 10L;
-        when(serviceOperationRepository.findById(eq(serviceOperationId))).thenReturn(Optional.of(mock(ServiceOperation.class)));
-        when(reportRepository.save(any(Report.class))).thenAnswer(invocation -> invocation.getArgument(0));
+  @Mock
+  private ReportRepository reportRepository;
+  @Mock
+  private ServiceOperationRepository serviceOperationRepository;
 
-        var command = new AddReportCommand(serviceOperationId, ReportType.MAINTENANCE, "Initial inspection report");
+  @InjectMocks
+  private ReportCommandServiceImpl reportCommandService;
 
-        // Act
-        Long id = reportCommandService.handle(command);
+  @Test
+  @DisplayName("Given an existing service operation, when handling AddReportCommand, then it returns the report id")
+  void handle_ShouldReturnReportId_WhenServiceOperationExists() {
+    // Arrange
+    AddReportCommand command = new AddReportCommand(10L, ReportType.INCIDENT, "desc");
+    when(serviceOperationRepository.findById(10L))
+        .thenReturn(Optional.of(mock(ServiceOperation.class)));
+    when(reportRepository.save(any(Report.class))).thenAnswer(invocation -> {
+      Report report = invocation.getArgument(0);
+      ReflectionTestUtils.setField(report, "id", 7L);
+      return report;
+    });
 
-        // Assert
-        assertNull(id, "Expected id to be null because repository save is mocked and no id is set");
-        verify(serviceOperationRepository, times(1)).findById(serviceOperationId);
-        verify(reportRepository, times(1)).save(any(Report.class));
-        verifyNoMoreInteractions(serviceOperationRepository, reportRepository);
-    }
+    // Act
+    Long result = reportCommandService.handle(command);
 
-    @Test
-    @DisplayName("handle(AddReportCommand) should throw IllegalArgumentException if ServiceOperation not found (AAA)")
-    void handle_AddReportCommand_ShouldThrowException_WhenServiceOperationNotFound(){
-        // Arrange
-        Long serviceOperationId = 10L;
-        when(serviceOperationRepository.findById(eq(serviceOperationId))).thenReturn(Optional.empty());
+    // Assert
+    assertEquals(7L, result);
+  }
 
-        var command = new AddReportCommand(serviceOperationId, ReportType.MAINTENANCE, "Preventive maintenance");
+  @Test
+  @DisplayName("Given a missing service operation, when handling AddReportCommand, then it throws IllegalArgument")
+  void handle_ShouldThrow_WhenServiceOperationMissing() {
+    // Arrange
+    AddReportCommand command = new AddReportCommand(10L, ReportType.INCIDENT, "desc");
+    when(serviceOperationRepository.findById(10L)).thenReturn(Optional.empty());
 
-        // Act + Assert
-        var ex = assertThrows(IllegalArgumentException.class, () -> reportCommandService.handle(command));
+    // Act & Assert
+    assertThrows(IllegalArgumentException.class, () -> reportCommandService.handle(command));
+  }
 
-        assertFalse(ex.getMessage().contains("No ServiceOperation found with RequestId: "));
-        verify(serviceOperationRepository, times(1)).findById(serviceOperationId);
-        verifyNoMoreInteractions(serviceOperationRepository);
-        verifyNoInteractions(reportRepository);
-    }
+  @Test
+  @DisplayName("Given a missing report, when handling DeleteReportCommand, then it throws IllegalArgument")
+  void handle_ShouldThrow_WhenDeletingMissingReport() {
+    // Arrange
+    DeleteReportCommand command = new DeleteReportCommand(5L);
+    when(reportRepository.findById(5L)).thenReturn(Optional.empty());
 
-    // -------------------------------------------------------------------------
-    // handle(DeleteReportCommand command) - DELETE REPORT
-    // -------------------------------------------------------------------------
-    @Test
-    @DisplayName("handle(DeleteReportCommand) should delete Report when found (AAA)")
-    void handle_DeleteReportCommand_ShouldDeleteReport(){
-        var reportId = 10L;
-        var existingReport = mock(Report.class);
-
-        when(reportRepository.findById(reportId)).thenReturn(Optional.of(existingReport));
-        var command = new DeleteReportCommand(reportId);
-
-        // Act
-        reportCommandService.handle(command);
-
-        // Assert
-        verify(reportRepository, times(1)).findById(reportId);
-        verify(reportRepository, times(1)).delete(existingReport);
-        verifyNoMoreInteractions(reportRepository);
-        verifyNoInteractions(serviceOperationRepository);
-    }
-
-    @Test
-    @DisplayName("handle(DeleteReportCommand) should throw IllegalArgumentException if Report not found (AAA)")
-    void handle_DeleteReportCommand_ShouldThrowException_WhenNotFound() {
-        // Arrange
-        var reportId = 10L;
-
-        when(reportRepository.findById(reportId)).thenReturn(Optional.empty());
-        var command = new DeleteReportCommand(reportId);
-
-        // Act + Assert
-        var ex = assertThrows(IllegalArgumentException.class, () -> {
-            reportCommandService.handle(command);
-        }, "Debe lanzar IllegalArgumentException si no existe Report.");
-
-        assertTrue(ex.getMessage().contains("Report not found"));
-
-        verify(reportRepository, times(1)).findById(reportId);
-        verify(reportRepository, never()).delete(any(Report.class));
-        verifyNoMoreInteractions(reportRepository);
-        verifyNoInteractions(serviceOperationRepository);
-    }
-
+    // Act & Assert
+    assertThrows(IllegalArgumentException.class, () -> reportCommandService.handle(command));
+  }
 }

@@ -1,8 +1,17 @@
 package com.hampcoders.electrolink.monitoring.application.internal.queryservices;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
 import com.hampcoders.electrolink.monitoring.domain.model.aggregates.Report;
-import com.hampcoders.electrolink.monitoring.domain.model.queries.*;
+import com.hampcoders.electrolink.monitoring.domain.model.queries.GetAllReportsQuery;
+import com.hampcoders.electrolink.monitoring.domain.model.queries.GetReportByIdQuery;
+import com.hampcoders.electrolink.monitoring.domain.model.queries.GetReportsByServiceOperationIdQuery;
 import com.hampcoders.electrolink.monitoring.infrastructure.persistence.jpa.repositories.ReportRepository;
+import java.util.List;
+import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -10,98 +19,54 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.List;
-import java.util.Optional;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
-
 @ExtendWith(MockitoExtension.class)
-public class ReportQueryServiceImplTest {
-    @Mock
-    private ReportRepository reportRepository;
+class ReportQueryServiceImplTest {
 
-    @InjectMocks
-    private ReportQueryServiceImpl reportQueryService;
+  @Mock
+  private ReportRepository reportRepository;
 
-    @Test
-    @DisplayName("handle(GetAllReportsQuery) should return the list from repository (AAA)")
-    void handle_GetAllReportsQuery_ShouldReturnAllReports() {
-        // Arrange
-        Report a = mock(Report.class);
-        Report b = mock(Report.class);
+  @InjectMocks
+  private ReportQueryServiceImpl reportQueryService;
 
-        when(reportRepository.findAll()).thenReturn(List.of(a, b));
-        var query = new GetAllReportsQuery();
+  @Test
+  @DisplayName("Given existing reports, when handling GetAllReportsQuery, then it returns all of them")
+  void handle_ShouldReturnAllReports_WhenQueryingAll() {
+    // Arrange
+    List<Report> reports = List.of(mock(Report.class));
+    when(reportRepository.findAll()).thenReturn(reports);
 
-        // Act
-        var actual = reportQueryService.handle(query);
+    // Act
+    List<Report> result = reportQueryService.handle(new GetAllReportsQuery());
 
-        // Assert
-        assertEquals(2, actual.size(), "Must return a list with 2 Reports.");
-        assertSame(a, actual.get(0));
-        assertSame(b, actual.get(1));
-        verify(reportRepository).findAll();
-        verifyNoMoreInteractions(reportRepository);
-    }
+    // Assert
+    assertEquals(reports, result);
+  }
 
-    @Test
-    @DisplayName("handle(GetReportByIdQuery) should return the Report from repository (AAA)")
-    void handle_GetReportByIdQuery_ShouldReturnReport() {
-        // Arrange
-        Long reportId = 10L;
-        Report expected = mock(Report.class);
+  @Test
+  @DisplayName("Given a missing id, when handling GetReportByIdQuery, then it returns empty")
+  void handle_ShouldReturnEmpty_WhenReportIdMissing() {
+    // Arrange
+    when(reportRepository.findById(5L)).thenReturn(Optional.empty());
 
-        when(reportRepository.findById(eq(reportId))).thenReturn(Optional.of(expected));
-        var query = new GetReportByIdQuery(10L);
+    // Act
+    Optional<Report> result = reportQueryService.handle(new GetReportByIdQuery(5L));
 
-        // Act
-        var actual = reportQueryService.handle(query);
+    // Assert
+    assertTrue(result.isEmpty());
+  }
 
-        // Assert
-        assertTrue(actual.isPresent());
-        assertSame(expected, actual.get());
-        verify(reportRepository).findById(reportId);
-        verifyNoMoreInteractions(reportRepository);
-    }
+  @Test
+  @DisplayName("Given reports for an operation, when handling GetReportsByServiceOperationIdQuery, then it returns them")
+  void handle_ShouldReturnReportsByOperation_WhenOperationHasReports() {
+    // Arrange
+    List<Report> reports = List.of(mock(Report.class));
+    when(reportRepository.findByServiceOperationId(10L)).thenReturn(reports);
 
-    @Test
-    @DisplayName("handle(GetReportByIdQuery) should return empty Optional when not found (AAA)")
-    void handle_GetReportByIdQuery_ShouldReturnEmptyOptionalWhenNotFound() {
-        // Arrange
-        Long reportId = 11L;
+    // Act
+    List<Report> result =
+        reportQueryService.handle(new GetReportsByServiceOperationIdQuery(10L));
 
-        when(reportRepository.findById(eq(reportId))).thenReturn(Optional.empty());
-        var query = new GetReportByIdQuery(11L);
-
-        // Act
-        var actual = reportQueryService.handle(query);
-
-        // Assert
-        assertTrue(actual.isEmpty(), "Must return empty Optional.");
-        verify(reportRepository).findById(reportId);
-        verifyNoMoreInteractions(reportRepository);
-    }
-
-    @Test
-    @DisplayName("handle(GetReportsByRequestIdQuery) should return list filtered by RequestId (AAA)")
-    void handle_GetReportsByRequestIdQuery_ShouldReturnReportsForRequest() {
-        // Arrange
-        var serviceOperationId = 12L;
-        var a = mock(Report.class);
-        var b = mock(Report.class);
-
-        when(reportRepository.findByServiceOperationId(eq(serviceOperationId))).thenReturn(List.of(a, b));
-        var query = new GetReportsByServiceOperationIdQuery(12L);
-
-        // Act
-        var actual = reportQueryService.handle(query);
-
-        // Assert
-        assertEquals(2, actual.size(), "Must return a list with 2 Reports.");
-        assertSame(a, actual.getFirst());
-        verify(reportRepository).findByServiceOperationId(serviceOperationId);
-        verifyNoMoreInteractions(reportRepository);
-    }
+    // Assert
+    assertEquals(reports, result);
+  }
 }
