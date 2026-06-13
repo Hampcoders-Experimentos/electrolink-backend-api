@@ -1,8 +1,7 @@
 package com.hampcoders.electrolink.assets.interfaces.rest.transform;
 
 import com.hampcoders.electrolink.assets.domain.model.commands.UpdateComponentStockCommand;
-import com.hampcoders.electrolink.assets.interfaces.rest.resource.UpdateComponentStockResource;
-import java.util.UUID;
+import com.hampcoders.electrolink.assets.interfaces.rest.resources.UpdateComponentStockResource;
 
 /**
  * Assembler to convert UpdateComponentStockResource into an UpdateComponentStockCommand.

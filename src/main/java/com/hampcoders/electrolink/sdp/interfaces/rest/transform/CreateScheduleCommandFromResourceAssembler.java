@@ -1,7 +1,7 @@
 package com.hampcoders.electrolink.sdp.interfaces.rest.transform;
 
 import com.hampcoders.electrolink.sdp.domain.model.commands.CreateScheduleCommand;
-import com.hampcoders.electrolink.sdp.interfaces.rest.resource.CreateScheduleResource;
+import com.hampcoders.electrolink.sdp.interfaces.rest.resources.CreateScheduleResource;
 
 /**
  * Assembler class responsible for transforming a CreateScheduleResource

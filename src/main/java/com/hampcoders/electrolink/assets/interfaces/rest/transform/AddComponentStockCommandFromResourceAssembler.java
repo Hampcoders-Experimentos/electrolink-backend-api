@@ -1,8 +1,7 @@
 package com.hampcoders.electrolink.assets.interfaces.rest.transform;
 
 import com.hampcoders.electrolink.assets.domain.model.commands.AddComponentStockCommand;
-import com.hampcoders.electrolink.assets.interfaces.rest.resource.AddComponentStockResource;
-import java.util.UUID;
+import com.hampcoders.electrolink.assets.interfaces.rest.resources.AddComponentStockResource;
 
 /**
  * Assembler to convert AddComponentStockResource into an AddComponentStockCommand.

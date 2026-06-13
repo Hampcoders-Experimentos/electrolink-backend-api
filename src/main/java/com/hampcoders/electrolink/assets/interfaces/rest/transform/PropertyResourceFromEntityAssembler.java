@@ -1,10 +1,10 @@
 package com.hampcoders.electrolink.assets.interfaces.rest.transform;
 
 import com.hampcoders.electrolink.assets.domain.model.aggregates.Property;
-import com.hampcoders.electrolink.assets.interfaces.rest.resource.AddressResource;
-import com.hampcoders.electrolink.assets.interfaces.rest.resource.DistrictResource;
-import com.hampcoders.electrolink.assets.interfaces.rest.resource.PropertyResource;
-import com.hampcoders.electrolink.assets.interfaces.rest.resource.RegionResource;
+import com.hampcoders.electrolink.assets.interfaces.rest.resources.AddressResource;
+import com.hampcoders.electrolink.assets.interfaces.rest.resources.DistrictResource;
+import com.hampcoders.electrolink.assets.interfaces.rest.resources.PropertyResource;
+import com.hampcoders.electrolink.assets.interfaces.rest.resources.RegionResource;
 
 /**
  * Assembler to convert Property entities into PropertyResource.

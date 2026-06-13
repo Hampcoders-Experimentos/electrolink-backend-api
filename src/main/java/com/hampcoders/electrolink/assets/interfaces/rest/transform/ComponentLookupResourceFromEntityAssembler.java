@@ -1,7 +1,7 @@
 package com.hampcoders.electrolink.assets.interfaces.rest.transform;
 
 import com.hampcoders.electrolink.assets.domain.model.aggregates.Component;
-import com.hampcoders.electrolink.assets.interfaces.rest.resource.ComponentLookupResource;
+import com.hampcoders.electrolink.assets.interfaces.rest.resources.ComponentLookupResource;
 
 /**
  * Assembler to convert Component entities into ComponentLookupResource.

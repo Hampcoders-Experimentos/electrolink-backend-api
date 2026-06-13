@@ -1,10 +1,9 @@
 package com.hampcoders.electrolink.sdp.interfaces.rest.transform;
 
 import com.hampcoders.electrolink.sdp.domain.model.aggregates.Request;
-import com.hampcoders.electrolink.sdp.interfaces.rest.resource.BillResource;
-import com.hampcoders.electrolink.sdp.interfaces.rest.resource.PhotoResource;
-import com.hampcoders.electrolink.sdp.interfaces.rest.resource.RequestResource;
-import java.util.List;
+import com.hampcoders.electrolink.sdp.interfaces.rest.resources.BillResource;
+import com.hampcoders.electrolink.sdp.interfaces.rest.resources.PhotoResource;
+import com.hampcoders.electrolink.sdp.interfaces.rest.resources.RequestResource;
 
 /**
  * Assembles a RequestResource from a Request entity.

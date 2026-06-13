@@ -244,6 +244,7 @@
                         <exclude>pe/edu/upc/center/platform/**/infrastructure/**</exclude>
                         <exclude>pe/edu/upc/center/platform/**/interfaces/rest/resources/**</exclude>
                         <exclude>pe/edu/upc/center/platform/**/interfaces/rest/controllers/**</exclude>
+						<exclude>pe/edu/upc/center/platform/**/interfaces/rest/transform/**</exclude>
                         <exclude>**/*Application*</exclude>
                     </excludes>
                     <rules>

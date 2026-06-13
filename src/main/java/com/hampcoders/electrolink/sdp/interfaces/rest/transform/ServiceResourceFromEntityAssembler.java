@@ -1,11 +1,11 @@
 package com.hampcoders.electrolink.sdp.interfaces.rest.transform;
 
 import com.hampcoders.electrolink.sdp.domain.model.aggregates.ServiceEntity;
-import com.hampcoders.electrolink.sdp.interfaces.rest.resource.ComponentQuantityResource;
-import com.hampcoders.electrolink.sdp.interfaces.rest.resource.PolicyResource;
-import com.hampcoders.electrolink.sdp.interfaces.rest.resource.RestrictionResource;
-import com.hampcoders.electrolink.sdp.interfaces.rest.resource.ServiceResource;
-import com.hampcoders.electrolink.sdp.interfaces.rest.resource.TagResource;
+import com.hampcoders.electrolink.sdp.interfaces.rest.resources.ComponentQuantityResource;
+import com.hampcoders.electrolink.sdp.interfaces.rest.resources.PolicyResource;
+import com.hampcoders.electrolink.sdp.interfaces.rest.resources.RestrictionResource;
+import com.hampcoders.electrolink.sdp.interfaces.rest.resources.ServiceResource;
+import com.hampcoders.electrolink.sdp.interfaces.rest.resources.TagResource;
 import java.util.Collections;
 import java.util.List;
 

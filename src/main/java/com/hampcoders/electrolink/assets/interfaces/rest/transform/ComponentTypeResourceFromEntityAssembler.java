@@ -1,8 +1,7 @@
 package com.hampcoders.electrolink.assets.interfaces.rest.transform;
 
 import com.hampcoders.electrolink.assets.domain.model.aggregates.ComponentType;
-import com.hampcoders.electrolink.assets.domain.model.valueobjects.ComponentTypeId;
-import com.hampcoders.electrolink.assets.interfaces.rest.resource.ComponentTypeResource;
+import com.hampcoders.electrolink.assets.interfaces.rest.resources.ComponentTypeResource;
 import org.springframework.stereotype.Component;
 
 /**

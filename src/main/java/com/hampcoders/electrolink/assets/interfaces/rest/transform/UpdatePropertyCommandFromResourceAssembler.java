@@ -3,9 +3,8 @@ package com.hampcoders.electrolink.assets.interfaces.rest.transform;
 import com.hampcoders.electrolink.assets.domain.model.commands.UpdatePropertyCommand;
 import com.hampcoders.electrolink.assets.domain.model.valueobjects.Address;
 import com.hampcoders.electrolink.assets.domain.model.valueobjects.District;
-import com.hampcoders.electrolink.assets.domain.model.valueobjects.OwnerId;
 import com.hampcoders.electrolink.assets.domain.model.valueobjects.Region;
-import com.hampcoders.electrolink.assets.interfaces.rest.resource.UpdatePropertyResource;
+import com.hampcoders.electrolink.assets.interfaces.rest.resources.UpdatePropertyResource;
 import java.util.UUID;
 
 /**

@@ -1,7 +1,7 @@
 package com.hampcoders.electrolink.sdp.interfaces.rest.transform;
 
 import com.hampcoders.electrolink.sdp.domain.model.aggregates.ScheduleAggregate;
-import com.hampcoders.electrolink.sdp.interfaces.rest.resource.ScheduleResource;
+import com.hampcoders.electrolink.sdp.interfaces.rest.resources.ScheduleResource;
 
 /**
  * Assembler class to convert ScheduleAggregate entities to ScheduleResources.

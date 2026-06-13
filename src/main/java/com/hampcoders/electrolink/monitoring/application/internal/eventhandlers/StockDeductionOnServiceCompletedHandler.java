@@ -1,7 +1,7 @@
 package com.hampcoders.electrolink.monitoring.application.internal.eventhandlers;
 
 import com.hampcoders.electrolink.assets.interfaces.acl.InventoryContextFacade;
-import com.hampcoders.electrolink.assets.interfaces.rest.resource.ComponentStockResource;
+import com.hampcoders.electrolink.assets.interfaces.rest.resources.ComponentStockResource;
 import com.hampcoders.electrolink.monitoring.domain.model.events.ServiceCompletedEvent;
 import com.hampcoders.electrolink.sdp.interfaces.acl.SdpContextFacade;
 import com.hampcoders.electrolink.sdp.interfaces.acl.SdpContextFacade.ServiceComponentRequirement;

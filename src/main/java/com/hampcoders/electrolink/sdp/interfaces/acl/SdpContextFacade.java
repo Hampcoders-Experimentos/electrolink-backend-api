@@ -8,7 +8,7 @@ import com.hampcoders.electrolink.sdp.domain.model.queries.FindServiceByIdQuery;
 import com.hampcoders.electrolink.sdp.domain.services.RequestCommandService;
 import com.hampcoders.electrolink.sdp.domain.services.RequestQueryService;
 import com.hampcoders.electrolink.sdp.domain.services.ServiceQueryService;
-import com.hampcoders.electrolink.sdp.interfaces.rest.resource.CreateRequestResource;
+import com.hampcoders.electrolink.sdp.interfaces.rest.resources.CreateRequestResource;
 import com.hampcoders.electrolink.sdp.interfaces.rest.transform.CreateRequestCommandFromResourceAssembler;
 import com.hampcoders.electrolink.sdp.interfaces.rest.transform.UpdateRequestCommandFromResourceAssembler;
 import java.time.LocalDate;
