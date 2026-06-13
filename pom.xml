@@ -244,7 +244,6 @@
                         <exclude>com/hampcoders/electrolink/**/infrastructure/**</exclude>
                         <exclude>com/hampcoders/electrolink/**/interfaces/rest/resources/**</exclude>
                         <exclude>com/hampcoders/electrolink/**/interfaces/rest/controllers/**</exclude>
-						<exclude>com/hampcoders/electrolink/**/interfaces/rest/transform/**</exclude>
                         <exclude>**/*Application*</exclude>
                     </excludes>
                     <rules>
