@@ -40,7 +40,8 @@ public final class ReportPhotoPayloadSupport {
   }
 
   /**
-   * Builds a content-based string representation, using {@link Arrays#toString} for the photo bytes.
+   * Builds a content-based string representation,
+   * using {@link Arrays#toString} for the photo bytes.
    *
    * @param typeName the simple name of the payload type to prefix the representation with
    */
