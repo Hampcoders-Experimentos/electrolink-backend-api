@@ -33,6 +33,7 @@ class RequestResourceFromEntityAssemblerTest {
     Photo photo = mock(Photo.class);
     when(photo.getPhotoId()).thenReturn("p1");
     when(photo.getUrl()).thenReturn("http://photo");
+    Bill bill = bill();
     Request request = mock(Request.class);
     when(request.getId()).thenReturn(7L);
     when(request.getClientId()).thenReturn("1");
@@ -42,7 +43,7 @@ class RequestResourceFromEntityAssemblerTest {
     when(request.getProblemDescription()).thenReturn("desc");
     when(request.getScheduledDate()).thenReturn(LocalDate.now());
     when(request.isPriority()).thenReturn(true);
-    when(request.getBill()).thenReturn(bill());
+    when(request.getBill()).thenReturn(bill);
     when(request.getPhotos()).thenReturn(List.of(photo));
 
     // Act
@@ -60,6 +61,7 @@ class RequestResourceFromEntityAssemblerTest {
   @DisplayName("Given a request without photos, when assembling, then the photo list is empty")
   void handle_ShouldMapEmptyPhotos_WhenNoPhotos() {
     // Arrange
+    Bill bill = bill();
     Request request = mock(Request.class);
     when(request.getId()).thenReturn(8L);
     when(request.getClientId()).thenReturn("2");
@@ -69,7 +71,7 @@ class RequestResourceFromEntityAssemblerTest {
     when(request.getProblemDescription()).thenReturn("desc2");
     when(request.getScheduledDate()).thenReturn(LocalDate.now());
     when(request.isPriority()).thenReturn(false);
-    when(request.getBill()).thenReturn(bill());
+    when(request.getBill()).thenReturn(bill);
     when(request.getPhotos()).thenReturn(List.of());
 
     // Act
