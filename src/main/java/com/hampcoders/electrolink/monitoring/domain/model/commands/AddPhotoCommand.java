@@ -1,8 +1,5 @@
 package com.hampcoders.electrolink.monitoring.domain.model.commands;
 
-import java.util.Arrays;
-import java.util.Objects;
-
 /**
  * Command to add a new photo to an existing report.
  *
@@ -22,26 +19,18 @@ public record AddPhotoCommand(Long reportId, byte[] photoData,
     if (!(o instanceof AddPhotoCommand that)) {
       return false;
     }
-    return Objects.equals(reportId, that.reportId)
-        && Arrays.equals(photoData, that.photoData)
-        && Objects.equals(fileName, that.fileName)
-        && Objects.equals(contentType, that.contentType);
+    return ReportPhotoPayloadSupport.payloadEquals(reportId, photoData, fileName, contentType,
+        that.reportId, that.photoData, that.fileName, that.contentType);
   }
 
   @Override
   public int hashCode() {
-    int result = Objects.hash(reportId, fileName, contentType);
-    result = 31 * result + Arrays.hashCode(photoData);
-    return result;
+    return ReportPhotoPayloadSupport.payloadHashCode(reportId, photoData, fileName, contentType);
   }
 
   @Override
   public String toString() {
-    return "AddPhotoCommand{"
-        + "reportId=" + reportId
-        + ", photoData=" + Arrays.toString(photoData)
-        + ", fileName='" + fileName + '\''
-        + ", contentType='" + contentType + '\''
-        + '}';
+    return ReportPhotoPayloadSupport.payloadToString("AddPhotoCommand",
+        reportId, photoData, fileName, contentType);
   }
 }

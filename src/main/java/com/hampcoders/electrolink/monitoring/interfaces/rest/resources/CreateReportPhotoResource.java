@@ -1,9 +1,8 @@
 package com.hampcoders.electrolink.monitoring.interfaces.rest.resources;
 
+import com.hampcoders.electrolink.monitoring.domain.model.commands.ReportPhotoPayloadSupport;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import java.util.Arrays;
-import java.util.Objects;
 
 /**
  * Resource used to represent the data required to associate a new photo with a report.
@@ -28,26 +27,18 @@ public record CreateReportPhotoResource(
     if (!(o instanceof CreateReportPhotoResource that)) {
       return false;
     }
-    return Objects.equals(reportId, that.reportId)
-        && Arrays.equals(photoData, that.photoData)
-        && Objects.equals(fileName, that.fileName)
-        && Objects.equals(contentType, that.contentType);
+    return ReportPhotoPayloadSupport.payloadEquals(reportId, photoData, fileName, contentType,
+        that.reportId, that.photoData, that.fileName, that.contentType);
   }
 
   @Override
   public int hashCode() {
-    int result = Objects.hash(reportId, fileName, contentType);
-    result = 31 * result + Arrays.hashCode(photoData);
-    return result;
+    return ReportPhotoPayloadSupport.payloadHashCode(reportId, photoData, fileName, contentType);
   }
 
   @Override
   public String toString() {
-    return "CreateReportPhotoResource{"
-        + "reportId=" + reportId
-        + ", photoData=" + Arrays.toString(photoData)
-        + ", fileName='" + fileName + '\''
-        + ", contentType='" + contentType + '\''
-        + '}';
+    return ReportPhotoPayloadSupport.payloadToString("CreateReportPhotoResource",
+        reportId, photoData, fileName, contentType);
   }
 }

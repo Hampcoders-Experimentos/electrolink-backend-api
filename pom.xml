@@ -9,7 +9,7 @@
 		<relativePath/> <!-- lookup parent from a repository -->
 	</parent>
 	<groupId>com.electrolink.platform</groupId>
-	<artifactId>service-platform-parent</artifactId>
+	<artifactId>electrolink-platform</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>service-platform-parent</name>
 	<description>Parent project for the service platform application</description>
