@@ -240,11 +240,11 @@
                 </executions>
                 <configuration>
                     <excludes>
-                        <exclude>pe/edu/upc/center/platform/**/domain/**</exclude>
-                        <exclude>pe/edu/upc/center/platform/**/infrastructure/**</exclude>
-                        <exclude>pe/edu/upc/center/platform/**/interfaces/rest/resources/**</exclude>
-                        <exclude>pe/edu/upc/center/platform/**/interfaces/rest/controllers/**</exclude>
-						<exclude>pe/edu/upc/center/platform/**/interfaces/rest/transform/**</exclude>
+                        <exclude>com/hampcoders/electrolink/**/domain/**</exclude>
+                        <exclude>com/hampcoders/electrolink/**/infrastructure/**</exclude>
+                        <exclude>com/hampcoders/electrolink/**/interfaces/rest/resources/**</exclude>
+                        <exclude>com/hampcoders/electrolink/**/interfaces/rest/controllers/**</exclude>
+						<exclude>com/hampcoders/electrolink/**/interfaces/rest/transform/**</exclude>
                         <exclude>**/*Application*</exclude>
                     </excludes>
                     <rules>
