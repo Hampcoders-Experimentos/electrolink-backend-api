@@ -45,9 +45,10 @@ public class ReportPhotoCommandServiceImpl implements ReportPhotoCommandService 
   @Transactional
   @Override
   public Long handle(AddPhotoCommand command) {
-    reportRepository.findById(command.reportId())
-        .orElseThrow(() -> new IllegalArgumentException(
-            "Report not found with ID: " + command.reportId()));
+    if (reportRepository.findById(command.reportId()).isEmpty()) {
+      throw new IllegalArgumentException(
+          "Report not found with ID: " + command.reportId());
+    }
 
     String storedUrl = photoStorageService.storePhoto(
         command.photoData(),

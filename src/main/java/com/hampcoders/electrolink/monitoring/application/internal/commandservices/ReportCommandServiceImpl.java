@@ -39,9 +39,10 @@ public class ReportCommandServiceImpl implements ReportCommandService {
    */
   @Override
   public Long handle(AddReportCommand command) {
-    serviceOperationRepository.findById(command.serviceOperationId())
-        .orElseThrow(() -> new IllegalArgumentException(
-            "No ServiceOperation found with id: " + command.serviceOperationId()));
+    if (serviceOperationRepository.findById(command.serviceOperationId()).isEmpty()) {
+      throw new IllegalArgumentException(
+          "No ServiceOperation found with id: " + command.serviceOperationId());
+    }
 
     var report = new Report(command);
     reportRepository.save(report);

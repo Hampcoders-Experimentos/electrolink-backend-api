@@ -15,6 +15,7 @@ import com.hampcoders.electrolink.monitoring.infrastructure.persistence.jpa.repo
 import com.hampcoders.electrolink.sdp.infrastructure.persistence.jpa.repositories.RequestRepository;
 import java.time.Duration;
 import java.time.LocalDate;
+import java.time.YearMonth;
 import java.time.ZoneId;
 import java.util.AbstractMap;
 import java.util.Comparator;
@@ -143,17 +144,11 @@ public class AnalyticsQueryServiceImpl implements AnalyticsQueryService {
     var cutoff = LocalDate.now().minusMonths(query.months());
 
     return operations.stream()
-        .collect(Collectors.groupingBy(op -> {
-          var completedDate = op.getCompletedAt().toLocalDate();
-          return new AbstractMap.SimpleEntry<>(completedDate.getYear(),
-              completedDate.getMonthValue());
-        }))
+        .collect(Collectors.groupingBy(op -> YearMonth.from(op.getCompletedAt().toLocalDate())))
         .entrySet().stream()
         .map(entry -> {
-          var year = entry.getKey().getKey();
-          var month = entry.getKey().getValue();
-          var periodStart = LocalDate.of(year, month, 1);
-          if (periodStart.isBefore(cutoff)) {
+          var period = entry.getKey();
+          if (period.atDay(1).isBefore(cutoff)) {
             return null;
           }
 
@@ -170,7 +165,7 @@ public class AnalyticsQueryServiceImpl implements AnalyticsQueryService {
           var avgPerService = count > 0 ? totalRevenue / count : 0.0;
           return new TechnicianRevenueResource(
               query.technicianId(),
-              year + "-" + String.format("%02d", month),
+              period.toString(),
               Math.round(totalRevenue * 100.0) / 100.0,
               count,
               Math.round(avgPerService * 100.0) / 100.0

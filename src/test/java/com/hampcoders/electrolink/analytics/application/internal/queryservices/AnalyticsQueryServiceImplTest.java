@@ -72,7 +72,7 @@ public class AnalyticsQueryServiceImplTest {
         // Assert
         assertNotNull(result);
         assertEquals(1, result.size());
-        var res = result.get(0);
+        var res = result.getFirst();
         assertEquals(ownerId, res.ownerId());
         assertEquals(100.0, res.energyConsumed());
         assertEquals(50.0, res.amountPaid());
@@ -109,7 +109,7 @@ public class AnalyticsQueryServiceImplTest {
         // Assert
         assertNotNull(result);
         assertEquals(1, result.size());
-        var res = result.get(0);
+        var res = result.getFirst();
         assertEquals(techId, res.technicianId());
         assertEquals(1, res.totalServicesCompleted());
         assertEquals(1, res.pendingServices());
@@ -142,7 +142,7 @@ public class AnalyticsQueryServiceImplTest {
         // Assert
         assertNotNull(result);
         assertEquals(1, result.size());
-        var res = result.get(0);
+        var res = result.getFirst();
         assertEquals(techId, res.technicianId());
         assertEquals(150.0, res.totalRevenue());
         assertEquals(1, res.servicesCount());

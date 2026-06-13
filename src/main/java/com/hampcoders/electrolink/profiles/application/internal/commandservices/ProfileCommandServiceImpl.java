@@ -99,7 +99,9 @@ public class ProfileCommandServiceImpl implements ProfileCommandService {
           + command.email() + " is already used by another profile.");
     }
 
-    var profileToUpdate = profileRepository.findById(profileId).get();
+    var profileToUpdate = profileRepository.findById(profileId)
+        .orElseThrow(() -> new IllegalArgumentException(
+            "Profile with id " + profileId + " does not exist."));
 
     var personName = new PersonName(command.firstName(), command.lastName());
     var email = new EmailAddress(command.email());
