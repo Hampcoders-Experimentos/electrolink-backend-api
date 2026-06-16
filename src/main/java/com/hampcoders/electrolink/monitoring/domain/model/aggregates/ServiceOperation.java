@@ -15,15 +15,20 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import java.time.OffsetDateTime;
 import lombok.Getter;
 
 /**
  * Represents a service operation performed by a technician in response to a request.
  * It is an Aggregate Root in the Monitoring context.
+ *
+ * <p>A request maps to at most one service operation: {@code request_id} carries a unique
+ * constraint so the lookup used when rating stays unambiguous.</p>
  */
 @Entity
-@Table
+@Table(uniqueConstraints =
+    @UniqueConstraint(name = "uq_service_operation_request_id", columnNames = "request_id"))
 public class ServiceOperation extends AuditableAbstractAggregateRootNoId<ServiceOperation> {
 
   @Id

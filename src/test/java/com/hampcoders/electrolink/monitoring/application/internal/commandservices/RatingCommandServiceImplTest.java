@@ -15,7 +15,7 @@ import com.hampcoders.electrolink.monitoring.domain.model.valueobjects.Technicia
 import com.hampcoders.electrolink.monitoring.infrastructure.persistence.jpa.repositories.RatingRepository;
 import com.hampcoders.electrolink.monitoring.infrastructure.persistence.jpa.repositories.ServiceOperationRepository;
 import com.hampcoders.electrolink.shared.test.util.ReflectionTestUtils;
-import java.util.Optional;
+import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -44,7 +44,7 @@ class RatingCommandServiceImplTest {
     // Arrange
     ServiceOperation serviceOperation = mock(ServiceOperation.class);
     when(serviceOperationRepository.findByRequestId(new RequestId(1L)))
-        .thenReturn(Optional.of(serviceOperation));
+        .thenReturn(List.of(serviceOperation));
     when(serviceOperation.getStatus()).thenReturn(ServiceStatus.COMPLETED);
     when(ratingRepository.save(any(Rating.class))).thenAnswer(invocation -> {
       Rating rating = invocation.getArgument(0);
@@ -64,7 +64,7 @@ class RatingCommandServiceImplTest {
   void handle_ShouldThrow_WhenServiceOperationNotFound() {
     // Arrange
     when(serviceOperationRepository.findByRequestId(new RequestId(1L)))
-        .thenReturn(Optional.empty());
+        .thenReturn(List.of());
 
     // Act & Assert
     assertThrows(IllegalArgumentException.class, () -> ratingCommandService.handle(command()));
@@ -76,7 +76,7 @@ class RatingCommandServiceImplTest {
     // Arrange
     ServiceOperation serviceOperation = mock(ServiceOperation.class);
     when(serviceOperationRepository.findByRequestId(new RequestId(1L)))
-        .thenReturn(Optional.of(serviceOperation));
+        .thenReturn(List.of(serviceOperation));
     when(serviceOperation.getStatus()).thenReturn(ServiceStatus.PENDING);
 
     // Act & Assert
