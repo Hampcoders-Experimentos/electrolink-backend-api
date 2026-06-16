@@ -14,15 +14,18 @@ import org.springframework.stereotype.Repository;
 public interface ProfileRepository extends JpaRepository<Profile, Long> {
 
   /**
-   * Finds a Profile by the person's first name and last name.
+   * Finds the profiles matching the person's first name and last name.
+   *
+   * <p>First name + last name is not unique, so this returns a list rather than an
+   * {@link Optional}. Returning an {@code Optional} would throw
+   * {@code NonUniqueResultException} as soon as more than one profile shares the name.</p>
    *
    * @param firstName the first name of the person
    * @param lastName the last name of the person
-   * @return an Optional containing the profile if found,
-   *     or empty if no profile with the specified name exists
+   * @return the list of matching profiles (empty if none)
    */
-  Optional<Profile> findByPersonName_FirstNameAndPersonName_LastName(String firstName,
-                                                                     String lastName);
+  List<Profile> findByPersonName_FirstNameAndPersonName_LastName(String firstName,
+                                                                 String lastName);
 
   /**
    * Finds a Profile by the email address.

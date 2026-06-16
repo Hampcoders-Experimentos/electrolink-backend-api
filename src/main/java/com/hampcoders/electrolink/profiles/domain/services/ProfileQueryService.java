@@ -32,12 +32,12 @@ public interface ProfileQueryService {
   Optional<Profile> handle(GetProfileByIdQuery query);
 
   /**
-   * Handles the GetProfileByFullNameQuery and returns an Optional containing the profile if found.
+   * Handles the GetProfileByFullNameQuery and returns the profiles matching the full name.
    *
    * @param query the query object containing the full name of the profile to fetch
-   * @return an Optional containing the Profile if found, or empty if not found
+   * @return the list of Profiles matching the full name (empty if none)
    */
-  Optional<Profile> handle(GetProfileByFullNameQuery query);
+  List<Profile> handle(GetProfileByFullNameQuery query);
 
   /**
    * Handles the GetProfileByEmailQuery and returns an Optional containing the profile if found.

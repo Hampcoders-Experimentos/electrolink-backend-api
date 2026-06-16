@@ -55,15 +55,14 @@ public class ProfileQueryServiceImpl implements ProfileQueryService {
   }
 
   /**
-   * Handles the GetProfileByFullNameQuery by fetching a profile
+   * Handles the GetProfileByFullNameQuery by fetching the profiles
    * with the specified first and last name from the database.
    *
-   * @param query the query object containing the full name of the profile to fetch
-   * @return an Optional containing the profile if found,
-   *     or empty if no profile with the specified full name exists
+   * @param query the query object containing the full name of the profiles to fetch
+   * @return the list of profiles matching the full name (empty if none)
    */
   @Override
-  public Optional<Profile> handle(GetProfileByFullNameQuery query) {
+  public List<Profile> handle(GetProfileByFullNameQuery query) {
     return profileRepository.findByPersonName_FirstNameAndPersonName_LastName(
       query.firstName(), query.lastName()
     );

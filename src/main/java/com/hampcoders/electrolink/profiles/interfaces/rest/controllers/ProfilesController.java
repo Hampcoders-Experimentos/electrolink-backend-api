@@ -158,10 +158,10 @@ public class ProfilesController {
         .map(ProfileResourceFromEntityAssembler::toResourceFromEntity)
         .collect(Collectors.toList());
     } else if (firstName != null && lastName != null) {
-      var optional = profileQueryService.handle(new GetProfileByFullNameQuery(firstName, lastName));
-      results = optional.map(profile ->
-            List.of(ProfileResourceFromEntityAssembler
-                .toResourceFromEntity(profile))).orElseGet(List::of);
+      results = profileQueryService.handle(new GetProfileByFullNameQuery(firstName, lastName))
+        .stream()
+        .map(ProfileResourceFromEntityAssembler::toResourceFromEntity)
+        .collect(Collectors.toList());
     } else {
       results = profileQueryService.handle(new GetAllProfilesQuery()).stream()
         .map(ProfileResourceFromEntityAssembler::toResourceFromEntity)
