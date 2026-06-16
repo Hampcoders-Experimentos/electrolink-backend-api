@@ -45,7 +45,7 @@ public class Profile extends AuditableAbstractAggregateRoot<Profile> {
 
   @Embedded
   @AttributeOverride(name = "address",
-      column = @Column(name = "email", length = 50, nullable = false, unique = true))
+      column = @Column(name = "email", length = 250, nullable = false, unique = true))
   private EmailAddress email;
 
   @Enumerated(EnumType.STRING)
