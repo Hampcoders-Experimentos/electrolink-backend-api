@@ -69,7 +69,11 @@ public class Role {
    * @return the role
    */
   public static Role toRoleFromName(String name) {
-    return new Role(Roles.valueOf(name));
+    var normalized = name.trim().toUpperCase();
+    if (!normalized.startsWith("ROLE_")) {
+      normalized = "ROLE_" + normalized;
+    }
+    return new Role(Roles.valueOf(normalized));
   }
 
   /**

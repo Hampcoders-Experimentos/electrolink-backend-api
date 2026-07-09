@@ -124,6 +124,7 @@ public class WebSecurityConfiguration {
             .requestMatchers(
                 "/api/v1/authentication/**",   // autenticación pública
                 "/api/v1/profiles/**",         // 👈 perfiles públicos
+                "/api/v1/requests/**",         // 👈 requests públicos
                 "/v3/api-docs/**",
                 "/swagger-ui.html",
                 "/swagger-ui/**",

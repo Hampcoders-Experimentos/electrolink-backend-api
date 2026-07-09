@@ -7,7 +7,6 @@ import com.hampcoders.electrolink.sdp.domain.model.commands.DeleteRequestCommand
 import com.hampcoders.electrolink.sdp.domain.model.commands.UpdateRequestCommand;
 import com.hampcoders.electrolink.sdp.domain.services.RequestCommandService;
 import com.hampcoders.electrolink.sdp.infrastructure.persistence.jpa.repositories.RequestRepository;
-import com.hampcoders.electrolink.subscription.interfaces.acl.SubscriptionContextFacade;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
@@ -18,21 +17,17 @@ import org.springframework.stereotype.Service;
 public class RequestCommandServiceImpl implements RequestCommandService {
 
   private final RequestRepository requestRepository;
-  private final SubscriptionContextFacade subscriptionContextFacade;
   private final TechnicianMatchingService technicianMatchingService;
 
   /**
    * Constructor for RequestCommandServiceImpl.
    *
    * @param requestRepository the repository for managing request persistence
-   * @param subscriptionContextFacade the facade for managing subscription context and limits
    * @param technicianMatchingService the service for matching technicians to requests
    */
   public RequestCommandServiceImpl(RequestRepository requestRepository,
-                                   SubscriptionContextFacade subscriptionContextFacade,
                                    TechnicianMatchingService technicianMatchingService) {
     this.requestRepository = requestRepository;
-    this.subscriptionContextFacade = subscriptionContextFacade;
     this.technicianMatchingService = technicianMatchingService;
   }
 
@@ -40,10 +35,6 @@ public class RequestCommandServiceImpl implements RequestCommandService {
   @Transactional
   public Request handle(CreateRequestCommand command) {
     var userId = Long.parseLong(command.clientId());
-
-    if (!subscriptionContextFacade.canUserMakeRequest(userId)) {
-      throw new IllegalStateException("Monthly request limit reached. Please upgrade your plan.");
-    }
 
     var request = new Request(command);
 
@@ -59,8 +50,6 @@ public class RequestCommandServiceImpl implements RequestCommandService {
 
     request.registerCreatedEvent();
     var saved = requestRepository.save(request);
-
-    subscriptionContextFacade.recordRequest(userId);
 
     return saved;
   }
