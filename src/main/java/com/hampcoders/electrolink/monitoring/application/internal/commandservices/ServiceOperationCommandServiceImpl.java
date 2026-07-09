@@ -35,6 +35,12 @@ public class ServiceOperationCommandServiceImpl implements ServiceOperationComma
    */
   @Override
   public Long handle(CreateServiceOperationCommand command) {
+    if (!serviceOperationRepository.findByRequestId(command.requestId()).isEmpty()) {
+      throw new IllegalStateException(
+          "A service operation already exists for request id: "
+              + command.requestId().requestId());
+    }
+
     var serviceOperation = new ServiceOperation(command);
 
     serviceOperationRepository.save(serviceOperation);

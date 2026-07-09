@@ -1,8 +1,17 @@
 package com.hampcoders.electrolink.analytics.application.internal.queryservices;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
 import com.hampcoders.electrolink.analytics.domain.model.queries.GetHomeOwnerConsumptionQuery;
 import com.hampcoders.electrolink.analytics.domain.model.queries.GetTechnicianPerformanceQuery;
 import com.hampcoders.electrolink.analytics.domain.model.queries.GetTechnicianRevenueQuery;
+import com.hampcoders.electrolink.analytics.interfaces.rest.resources.HomeOwnerConsumptionResource;
+import com.hampcoders.electrolink.analytics.interfaces.rest.resources.TechnicianPerformanceResource;
+import com.hampcoders.electrolink.analytics.interfaces.rest.resources.TechnicianRevenueResource;
 import com.hampcoders.electrolink.assets.infrastructure.persistence.jpa.repositories.PropertyRepository;
 import com.hampcoders.electrolink.monitoring.domain.model.aggregates.Rating;
 import com.hampcoders.electrolink.monitoring.domain.model.aggregates.ServiceOperation;
@@ -14,6 +23,14 @@ import com.hampcoders.electrolink.monitoring.infrastructure.persistence.jpa.repo
 import com.hampcoders.electrolink.sdp.domain.model.aggregates.Request;
 import com.hampcoders.electrolink.sdp.domain.model.entities.Bill;
 import com.hampcoders.electrolink.sdp.infrastructure.persistence.jpa.repositories.RequestRepository;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.OffsetDateTime;
+import java.time.YearMonth;
+import java.time.ZoneId;
+import java.util.Date;
+import java.util.List;
+import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -21,131 +38,254 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.time.LocalDateTime;
-import java.time.OffsetDateTime;
-import java.time.ZoneId;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
-
 @ExtendWith(MockitoExtension.class)
-public class AnalyticsQueryServiceImplTest {
+class AnalyticsQueryServiceImplTest {
 
-    @Mock
-    private ServiceOperationRepository serviceOperationRepository;
-    @Mock
-    private RequestRepository requestRepository;
-    @Mock
-    private PropertyRepository propertyRepository;
-    @Mock
-    private RatingRepository ratingRepository;
+  @Mock
+  private ServiceOperationRepository serviceOperationRepository;
+  @Mock
+  private RequestRepository requestRepository;
+  @Mock
+  private PropertyRepository propertyRepository;
+  @Mock
+  private RatingRepository ratingRepository;
 
-    @InjectMocks
-    private AnalyticsQueryServiceImpl analyticsQueryService;
+  @InjectMocks
+  private AnalyticsQueryServiceImpl analyticsQueryService;
 
-    @Test
-    @DisplayName("handle(GetHomeOwnerConsumptionQuery) should return aggregated consumption data (AAA)")
-    void handle_GetHomeOwnerConsumption_ShouldReturnAggregatedData() {
-        // Arrange
-        Long ownerId = 1L;
-        var query = new GetHomeOwnerConsumptionQuery(ownerId, 12);
+  // ---------- GetHomeOwnerConsumptionQuery ----------
 
-        var request1 = mock(Request.class);
-        var bill1 = new Bill("2023-10", 100.0, 50.0, "url");
-        when(request1.getBill()).thenReturn(bill1);
-        when(request1.getCreatedAt()).thenReturn(Date.from(LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant()));
+  @Test
+  @DisplayName("Given a recent request with a bill, when handling consumption, then it aggregates the period")
+  void handle_ShouldAggregateConsumption_WhenRecentRequestHasBill() {
+    // Arrange
+    GetHomeOwnerConsumptionQuery query = new GetHomeOwnerConsumptionQuery(1L, 6);
+    LocalDate today = LocalDate.now(ZoneId.systemDefault());
+    Bill bill = mock(Bill.class);
+    when(bill.getEnergyConsumed()).thenReturn(100.0);
+    when(bill.getAmountPaid()).thenReturn(50.0);
+    Request request = mock(Request.class);
+    when(request.getCreatedAt()).thenReturn(Date.from(Instant.now()));
+    when(request.getBill()).thenReturn(bill);
+    when(requestRepository.findByClientId("1")).thenReturn(List.of(request));
 
-        var request2 = mock(Request.class);
-        when(request2.getBill()).thenReturn(null);
-        when(request2.getCreatedAt()).thenReturn(Date.from(LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant()));
+    // Act
+    List<HomeOwnerConsumptionResource> result = analyticsQueryService.handle(query);
 
-        when(requestRepository.findByClientId(String.valueOf(ownerId))).thenReturn(List.of(request1, request2));
+    // Assert
+    assertEquals(1, result.size());
+    HomeOwnerConsumptionResource resource = result.getFirst();
+    assertEquals(1L, resource.ownerId());
+    assertEquals(today.getYear(), resource.year());
+    assertEquals(today.getMonthValue(), resource.month());
+    assertEquals(100.0, resource.energyConsumed());
+    assertEquals(50.0, resource.amountPaid());
+    assertEquals(1, resource.serviceRequestsCount());
+  }
 
-        // Act
-        var result = analyticsQueryService.handle(query);
+  @Test
+  @DisplayName("Given no requests, when handling consumption, then it returns an empty list")
+  void handle_ShouldReturnEmpty_WhenNoConsumptionRequests() {
+    // Arrange
+    GetHomeOwnerConsumptionQuery query = new GetHomeOwnerConsumptionQuery(1L, 6);
+    when(requestRepository.findByClientId("1")).thenReturn(List.of());
 
-        // Assert
-        assertNotNull(result);
-        assertEquals(1, result.size());
-        var res = result.get(0);
-        assertEquals(ownerId, res.ownerId());
-        assertEquals(100.0, res.energyConsumed());
-        assertEquals(50.0, res.amountPaid());
-        assertEquals(2, res.serviceRequestsCount());
-    }
+    // Act
+    List<HomeOwnerConsumptionResource> result = analyticsQueryService.handle(query);
 
-    @Test
-    @DisplayName("handle(GetTechnicianPerformanceQuery) should return performance metrics (AAA)")
-    void handle_GetTechnicianPerformance_ShouldReturnMetrics() {
-        // Arrange
-        Long techId = 1L;
-        var query = new GetTechnicianPerformanceQuery(techId);
+    // Assert
+    assertTrue(result.isEmpty());
+  }
 
-        var op1 = mock(ServiceOperation.class);
-        when(op1.getCurrentStatus()).thenReturn(ServiceStatus.COMPLETED);
-        when(op1.getStartedAt()).thenReturn(OffsetDateTime.now().minusHours(2));
-        when(op1.getCompletedAt()).thenReturn(OffsetDateTime.now());
+  @Test
+  @DisplayName("Given a recent request without a bill, when handling consumption, then totals are zero")
+  void handle_ShouldReturnZeroTotals_WhenConsumptionRequestHasNoBill() {
+    // Arrange
+    GetHomeOwnerConsumptionQuery query = new GetHomeOwnerConsumptionQuery(1L, 6);
+    Request request = mock(Request.class);
+    when(request.getCreatedAt()).thenReturn(Date.from(Instant.now()));
+    when(request.getBill()).thenReturn(null);
+    when(requestRepository.findByClientId("1")).thenReturn(List.of(request));
 
-        var op2 = mock(ServiceOperation.class);
-        when(op2.getCurrentStatus()).thenReturn(ServiceStatus.PENDING);
+    // Act
+    List<HomeOwnerConsumptionResource> result = analyticsQueryService.handle(query);
 
-        when(serviceOperationRepository.findByTechnicianId(any(TechnicianId.class))).thenReturn(List.of(op1, op2));
+    // Assert
+    assertEquals(1, result.size());
+    assertEquals(0.0, result.getFirst().energyConsumed());
+    assertEquals(0.0, result.getFirst().amountPaid());
+    assertEquals(1, result.getFirst().serviceRequestsCount());
+  }
 
-        var rating1 = mock(Rating.class);
-        when(rating1.getScore()).thenReturn(5);
-        var rating2 = mock(Rating.class);
-        when(rating2.getScore()).thenReturn(4);
+  // ---------- GetTechnicianPerformanceQuery ----------
 
-        when(ratingRepository.findByTechnicianId(any(TechnicianId.class))).thenReturn(List.of(rating1, rating2));
+  @Test
+  @DisplayName("Given completed and pending operations with ratings, when handling performance, then it computes metrics")
+  void handle_ShouldComputeMetrics_WhenPerformanceDataExists() {
+    // Arrange
+    GetTechnicianPerformanceQuery query = new GetTechnicianPerformanceQuery(7L);
+    OffsetDateTime start = OffsetDateTime.now();
 
-        // Act
-        var result = analyticsQueryService.handle(query);
+    ServiceOperation completedOne = mock(ServiceOperation.class);
+    when(completedOne.getCurrentStatus()).thenReturn(ServiceStatus.COMPLETED);
+    when(completedOne.getStartedAt()).thenReturn(start);
+    when(completedOne.getCompletedAt()).thenReturn(start.plusMinutes(60));
 
-        // Assert
-        assertNotNull(result);
-        assertEquals(1, result.size());
-        var res = result.get(0);
-        assertEquals(techId, res.technicianId());
-        assertEquals(1, res.totalServicesCompleted());
-        assertEquals(1, res.pendingServices());
-        assertEquals(4.5, res.averageRating());
-        assertEquals(2.0, res.averageCompletionTimeHours());
-    }
+    ServiceOperation completedTwo = mock(ServiceOperation.class);
+    when(completedTwo.getCurrentStatus()).thenReturn(ServiceStatus.COMPLETED);
+    when(completedTwo.getStartedAt()).thenReturn(start);
+    when(completedTwo.getCompletedAt()).thenReturn(start.plusMinutes(120));
 
-    @Test
-    @DisplayName("handle(GetTechnicianRevenueQuery) should return aggregated revenue data (AAA)")
-    void handle_GetTechnicianRevenue_ShouldReturnAggregatedData() {
-        // Arrange
-        Long techId = 1L;
-        var query = new GetTechnicianRevenueQuery(techId, 12);
+    ServiceOperation pending = mock(ServiceOperation.class);
+    when(pending.getCurrentStatus()).thenReturn(ServiceStatus.PENDING);
 
-        var op1 = mock(ServiceOperation.class);
-        when(op1.getCurrentStatus()).thenReturn(ServiceStatus.COMPLETED);
-        when(op1.getCompletedAt()).thenReturn(OffsetDateTime.now());
-        when(op1.getRequestId()).thenReturn(new RequestId(10L));
+    Rating ratingFour = mock(Rating.class);
+    when(ratingFour.getScore()).thenReturn(4);
+    Rating ratingFive = mock(Rating.class);
+    when(ratingFive.getScore()).thenReturn(5);
 
-        when(serviceOperationRepository.findByTechnicianId(any(TechnicianId.class))).thenReturn(List.of(op1));
+    when(serviceOperationRepository.findByTechnicianId(any(TechnicianId.class)))
+        .thenReturn(List.of(completedOne, completedTwo, pending));
+    when(ratingRepository.findByTechnicianId(any(TechnicianId.class)))
+        .thenReturn(List.of(ratingFour, ratingFive));
 
-        var request = mock(Request.class);
-        var bill = new Bill("2023-10", 0.0, 150.0, "url");
-        when(request.getBill()).thenReturn(bill);
-        when(requestRepository.findById(10L)).thenReturn(Optional.of(request));
+    // Act
+    List<TechnicianPerformanceResource> result = analyticsQueryService.handle(query);
 
-        // Act
-        var result = analyticsQueryService.handle(query);
+    // Assert
+    assertEquals(1, result.size());
+    TechnicianPerformanceResource resource = result.getFirst();
+    assertEquals(7L, resource.technicianId());
+    assertEquals(2, resource.totalServicesCompleted());
+    assertEquals(1, resource.pendingServices());
+    assertEquals(4.5, resource.averageRating());
+    assertEquals(1.5, resource.averageCompletionTimeHours());
+  }
 
-        // Assert
-        assertNotNull(result);
-        assertEquals(1, result.size());
-        var res = result.get(0);
-        assertEquals(techId, res.technicianId());
-        assertEquals(150.0, res.totalRevenue());
-        assertEquals(1, res.servicesCount());
-        assertEquals(150.0, res.averageRevenuePerService());
-    }
+  @Test
+  @DisplayName("Given no operations or ratings, when handling performance, then metrics are zero")
+  void handle_ShouldReturnZeroMetrics_WhenNoPerformanceData() {
+    // Arrange
+    GetTechnicianPerformanceQuery query = new GetTechnicianPerformanceQuery(7L);
+    when(serviceOperationRepository.findByTechnicianId(any(TechnicianId.class)))
+        .thenReturn(List.of());
+    when(ratingRepository.findByTechnicianId(any(TechnicianId.class)))
+        .thenReturn(List.of());
+
+    // Act
+    List<TechnicianPerformanceResource> result = analyticsQueryService.handle(query);
+
+    // Assert
+    assertEquals(1, result.size());
+    TechnicianPerformanceResource resource = result.getFirst();
+    assertEquals(0, resource.totalServicesCompleted());
+    assertEquals(0, resource.pendingServices());
+    assertEquals(0.0, resource.averageRating());
+    assertEquals(0.0, resource.averageCompletionTimeHours());
+  }
+
+  @Test
+  @DisplayName("Given a completed operation lacking timestamps and a null score, when handling performance, then time and rating are zero")
+  void handle_ShouldIgnoreIncompleteData_WhenPerformanceTimestampsMissing() {
+    // Arrange
+    GetTechnicianPerformanceQuery query = new GetTechnicianPerformanceQuery(7L);
+
+    ServiceOperation completed = mock(ServiceOperation.class);
+    when(completed.getCurrentStatus()).thenReturn(ServiceStatus.COMPLETED);
+    when(completed.getCompletedAt()).thenReturn(null);
+
+    Rating nullScore = mock(Rating.class);
+    when(nullScore.getScore()).thenReturn(null);
+
+    when(serviceOperationRepository.findByTechnicianId(any(TechnicianId.class)))
+        .thenReturn(List.of(completed));
+    when(ratingRepository.findByTechnicianId(any(TechnicianId.class)))
+        .thenReturn(List.of(nullScore));
+
+    // Act
+    List<TechnicianPerformanceResource> result = analyticsQueryService.handle(query);
+
+    // Assert
+    assertEquals(1, result.size());
+    TechnicianPerformanceResource resource = result.getFirst();
+    assertEquals(1, resource.totalServicesCompleted());
+    assertEquals(0.0, resource.averageCompletionTimeHours());
+    assertEquals(0.0, resource.averageRating());
+  }
+
+  // ---------- GetTechnicianRevenueQuery ----------
+
+  @Test
+  @DisplayName("Given a completed operation with a paid request, when handling revenue, then it sums the period revenue")
+  void handle_ShouldSumRevenue_WhenCompletedOperationHasPaidRequest() {
+    // Arrange
+    GetTechnicianRevenueQuery query = new GetTechnicianRevenueQuery(7L, 6);
+
+    ServiceOperation operation = mock(ServiceOperation.class);
+    when(operation.getCurrentStatus()).thenReturn(ServiceStatus.COMPLETED);
+    when(operation.getCompletedAt()).thenReturn(OffsetDateTime.now());
+    when(operation.getRequestId()).thenReturn(new RequestId(10L));
+
+    Bill bill = mock(Bill.class);
+    when(bill.getAmountPaid()).thenReturn(200.0);
+    Request request = mock(Request.class);
+    when(request.getBill()).thenReturn(bill);
+
+    when(serviceOperationRepository.findByTechnicianId(any(TechnicianId.class)))
+        .thenReturn(List.of(operation));
+    when(requestRepository.findById(10L)).thenReturn(Optional.of(request));
+
+    // Act
+    List<TechnicianRevenueResource> result = analyticsQueryService.handle(query);
+
+    // Assert
+    assertEquals(1, result.size());
+    TechnicianRevenueResource resource = result.getFirst();
+    assertEquals(7L, resource.technicianId());
+    assertEquals(YearMonth.now().toString(), resource.period());
+    assertEquals(200.0, resource.totalRevenue());
+    assertEquals(1, resource.servicesCount());
+    assertEquals(200.0, resource.averageRevenuePerService());
+  }
+
+  @Test
+  @DisplayName("Given no completed operations, when handling revenue, then it returns an empty list")
+  void handle_ShouldReturnEmpty_WhenNoRevenueOperations() {
+    // Arrange
+    GetTechnicianRevenueQuery query = new GetTechnicianRevenueQuery(7L, 6);
+    when(serviceOperationRepository.findByTechnicianId(any(TechnicianId.class)))
+        .thenReturn(List.of());
+
+    // Act
+    List<TechnicianRevenueResource> result = analyticsQueryService.handle(query);
+
+    // Assert
+    assertTrue(result.isEmpty());
+  }
+
+  @Test
+  @DisplayName("Given a completed operation whose request is missing, when handling revenue, then revenue is zero")
+  void handle_ShouldReturnZeroRevenue_WhenRequestNotFound() {
+    // Arrange
+    GetTechnicianRevenueQuery query = new GetTechnicianRevenueQuery(7L, 6);
+
+    ServiceOperation operation = mock(ServiceOperation.class);
+    when(operation.getCurrentStatus()).thenReturn(ServiceStatus.COMPLETED);
+    when(operation.getCompletedAt()).thenReturn(OffsetDateTime.now());
+    when(operation.getRequestId()).thenReturn(new RequestId(10L));
+
+    when(serviceOperationRepository.findByTechnicianId(any(TechnicianId.class)))
+        .thenReturn(List.of(operation));
+    when(requestRepository.findById(10L)).thenReturn(Optional.empty());
+
+    // Act
+    List<TechnicianRevenueResource> result = analyticsQueryService.handle(query);
+
+    // Assert
+    assertEquals(1, result.size());
+    TechnicianRevenueResource resource = result.getFirst();
+    assertEquals(0.0, resource.totalRevenue());
+    assertEquals(1, resource.servicesCount());
+    assertEquals(0.0, resource.averageRevenuePerService());
+  }
 }

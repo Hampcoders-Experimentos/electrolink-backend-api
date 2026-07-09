@@ -1,7 +1,7 @@
 package com.hampcoders.electrolink.sdp.interfaces.rest.transform;
 
 import com.hampcoders.electrolink.sdp.domain.model.commands.UpdateScheduleCommand;
-import com.hampcoders.electrolink.sdp.interfaces.rest.resource.UpdateScheduleResource;
+import com.hampcoders.electrolink.sdp.interfaces.rest.resources.UpdateScheduleResource;
 
 /**
  * Assembler class that transforms an UpdateScheduleResource into an UpdateScheduleCommand.

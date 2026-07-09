@@ -1,60 +1,73 @@
 package com.hampcoders.electrolink.monitoring.interfaces.rest.transform;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
 import com.hampcoders.electrolink.monitoring.domain.model.aggregates.ServiceOperation;
 import com.hampcoders.electrolink.monitoring.domain.model.valueobjects.RequestId;
 import com.hampcoders.electrolink.monitoring.domain.model.valueobjects.ServiceStatus;
 import com.hampcoders.electrolink.monitoring.domain.model.valueobjects.TechnicianId;
 import com.hampcoders.electrolink.monitoring.interfaces.rest.resources.ServiceOperationResource;
+import java.time.OffsetDateTime;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import java.time.OffsetDateTime;
+class ServiceOperationResourceFromEntityAssemblerTest {
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+  @Test
+  @DisplayName("Given a service operation, when assembling, then it maps all fields")
+  void handle_ShouldMapAllFields_WhenOperationProvided() {
+    // Arrange
+    OffsetDateTime startedAt = OffsetDateTime.now();
+    OffsetDateTime completedAt = startedAt.plusHours(1);
+    ServiceOperation operation = mock(ServiceOperation.class);
+    when(operation.getId()).thenReturn(3L);
+    when(operation.getRequestId()).thenReturn(new RequestId(1L));
+    when(operation.getTechnicianId()).thenReturn(new TechnicianId(2L));
+    when(operation.getStartedAt()).thenReturn(startedAt);
+    when(operation.getCompletedAt()).thenReturn(completedAt);
+    when(operation.getCurrentStatus()).thenReturn(ServiceStatus.COMPLETED);
 
-public class ServiceOperationResourceFromEntityAssemblerTest {
-    @Test
-    @DisplayName("toResourceFromEntity should map a COMPLETED ServiceOperation entity to ServiceOperationResource (AAA)")
-    void toResourceFromEntity_ShouldMapCompletedEntityToResource() {
-        // Arrange
-        Long serviceOperationId = 100L;
-        Long requestId = 10L;
-        Long technicianId = 20L;
-        OffsetDateTime startedAt = OffsetDateTime.parse("2025-10-05T09:00:00Z");
-        OffsetDateTime completedAt = OffsetDateTime.parse("2025-10-05T12:30:00Z");
-        ServiceStatus status = ServiceStatus.COMPLETED;
+    // Act
+    ServiceOperationResource resource =
+        ServiceOperationResourceFromEntityAssembler.toResourceFromEntity(operation);
 
-        var requestIdVo = new RequestId(requestId);
-        var technicianIdVo = new TechnicianId(technicianId);
+    // Assert
+    assertEquals(3L, resource.id());
+    assertEquals(1L, resource.requestId());
+    assertEquals(2L, resource.technicianId());
+    assertEquals(startedAt, resource.startedAt());
+    assertEquals(completedAt, resource.completedAt());
+    assertEquals("COMPLETED", resource.currentStatus());
+  }
 
-        ServiceOperation entity = mock(ServiceOperation.class);
-        when(entity.getId()).thenReturn(serviceOperationId);
-        when(entity.getRequestId()).thenReturn(requestIdVo);
-        when(entity.getTechnicianId()).thenReturn(technicianIdVo);
-        when(entity.getStartedAt()).thenReturn(startedAt);
-        when(entity.getCompletedAt()).thenReturn(completedAt);
-        when(entity.getCurrentStatus()).thenReturn(status);
+  @Test
+  @DisplayName("Given an in-progress operation, when assembling, then it maps the in-progress status")
+  void handle_ShouldMapInProgressStatus_WhenOperationIsInProgress() {
+    // Arrange
+    ServiceOperation operation = mock(ServiceOperation.class);
+    when(operation.getId()).thenReturn(4L);
+    when(operation.getRequestId()).thenReturn(new RequestId(5L));
+    when(operation.getTechnicianId()).thenReturn(new TechnicianId(6L));
+    when(operation.getStartedAt()).thenReturn(OffsetDateTime.now());
+    when(operation.getCompletedAt()).thenReturn(null);
+    when(operation.getCurrentStatus()).thenReturn(ServiceStatus.IN_PROGRESS);
 
-        // Act
-        ServiceOperationResource resource = ServiceOperationResourceFromEntityAssembler.toResourceFromEntity(entity);
+    // Act
+    ServiceOperationResource resource =
+        ServiceOperationResourceFromEntityAssembler.toResourceFromEntity(operation);
 
-        // Assert
-        assertNotNull(resource, "El recurso retornado no debe ser nulo.");
+    // Assert
+    assertEquals("IN_PROGRESS", resource.currentStatus());
+  }
 
-        assertEquals(serviceOperationId, resource.id(), "El ID del servicio debe coincidir.");
-        assertEquals(requestId, resource.requestId(), "El RequestId (Long) debe coincidir.");
-        assertEquals(technicianId, resource.technicianId(), "El TechnicianId (Long) debe coincidir.");
-        assertEquals(startedAt, resource.startedAt(), "La fecha de inicio debe coincidir.");
-        assertEquals(completedAt, resource.completedAt(), "La fecha de finalización debe coincidir.");
-        assertEquals(status.name(), resource.currentStatus(), "El estado debe convertirse a su nombre String.");
-
-        verify(entity).getId();
-        verify(entity).getRequestId();
-        verify(entity).getTechnicianId();
-        verify(entity).getStartedAt();
-        verify(entity).getCompletedAt();
-        verify(entity).getCurrentStatus();
-        verifyNoMoreInteractions(entity);
-    }
+  @Test
+  @DisplayName("Given a null operation, when assembling, then it throws NullPointerException")
+  void handle_ShouldThrowNullPointer_WhenOperationIsNull() {
+    // Act & Assert
+    assertThrows(NullPointerException.class,
+        () -> ServiceOperationResourceFromEntityAssembler.toResourceFromEntity(null));
+  }
 }

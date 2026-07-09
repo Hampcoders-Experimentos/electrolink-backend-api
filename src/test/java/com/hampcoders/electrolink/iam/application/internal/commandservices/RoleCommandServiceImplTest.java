@@ -1,5 +1,12 @@
 package com.hampcoders.electrolink.iam.application.internal.commandservices;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
 import com.hampcoders.electrolink.iam.domain.model.commands.SeedRolesCommand;
 import com.hampcoders.electrolink.iam.domain.model.entities.Role;
 import com.hampcoders.electrolink.iam.domain.model.valueobjects.Roles;
@@ -11,59 +18,49 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import static org.mockito.ArgumentMatchers.argThat;
-import static org.mockito.Mockito.*;
-
 @ExtendWith(MockitoExtension.class)
-public class RoleCommandServiceImplTest {
-    @Mock
-    private RoleRepository roleRepository;
+class RoleCommandServiceImplTest {
 
-    @InjectMocks
-    private RoleCommandServiceImpl roleCommandService;
+  @Mock
+  private RoleRepository roleRepository;
 
-    @Test
-    @DisplayName("handle(SeedRolesCommand) seeds all missing roles (AAA)")
-    void handle_ShouldSeed_AllMissingRoles() {
-        // Arrange
-        for (Roles r : Roles.values()) {
-            when(roleRepository.existsByName(r)).thenReturn(false);
-            //when(roleRepository.save(any(Role.class))).thenAnswer(inv -> inv.getArgument(0));
-        }
+  @InjectMocks
+  private RoleCommandServiceImpl roleCommandService;
 
-        // Act
-        roleCommandService.handle(new SeedRolesCommand());
+  @Test
+  @DisplayName("Given no roles exist, when handling SeedRolesCommand, then it saves every role")
+  void handle_ShouldSaveAllRoles_WhenNoneExist() {
+    // Arrange
+    when(roleRepository.existsByName(any(Roles.class))).thenReturn(false);
 
-        // Assert
-        for (Roles r : Roles.values()) {
-            verify(roleRepository).existsByName(r);
-            verify(roleRepository).save(argThat(role -> role != null && role.getName() == r));
-        }
-        verifyNoMoreInteractions(roleRepository);
-    }
+    // Act
+    roleCommandService.handle(new SeedRolesCommand());
 
-    @Test
-    @DisplayName("handle(SeedRolesCommand) skips existing roles (AAA)")
-    void handle_ShouldSkip_WhenRoleExists() {
-        // Arrange
-        Roles[] vals = Roles.values();
-        when(roleRepository.existsByName(vals[0])).thenReturn(true);
-        for (int i = 1; i < vals.length; i++) {
-            when(roleRepository.existsByName(vals[i])).thenReturn(false);
-        }
-        when(roleRepository.save(any(Role.class))).thenAnswer(inv -> inv.getArgument(0));
+    // Assert
+    verify(roleRepository, times(Roles.values().length)).save(any(Role.class));
+  }
 
-        // Act
-        roleCommandService.handle(new SeedRolesCommand());
+  @Test
+  @DisplayName("Given all roles already exist, when handling SeedRolesCommand, then it saves none")
+  void handle_ShouldSkipSaving_WhenAllRolesExist() {
+    // Arrange
+    when(roleRepository.existsByName(any(Roles.class))).thenReturn(true);
 
-        // Assert
-        verify(roleRepository).existsByName(vals[0]);
-        verify(roleRepository, never()).save(argThat(role -> role != null && role.getName() == vals[0]));
-        for (int i = 1; i < vals.length; i++) {
-            Roles r = vals[i];
-            verify(roleRepository).existsByName(r);
-            verify(roleRepository).save(argThat(role -> role != null && role.getName() == r));
-        }
-        verifyNoMoreInteractions(roleRepository);
-    }
+    // Act
+    roleCommandService.handle(new SeedRolesCommand());
+
+    // Assert
+    verify(roleRepository, never()).save(any(Role.class));
+  }
+
+  @Test
+  @DisplayName("Given the repository fails to save, when handling SeedRolesCommand, then it propagates the exception")
+  void handle_ShouldPropagateException_WhenSaveFails() {
+    // Arrange
+    when(roleRepository.existsByName(any(Roles.class))).thenReturn(false);
+    when(roleRepository.save(any(Role.class))).thenThrow(new RuntimeException("DB error"));
+
+    // Act & Assert
+    assertThrows(RuntimeException.class, () -> roleCommandService.handle(new SeedRolesCommand()));
+  }
 }

@@ -5,8 +5,7 @@ import com.hampcoders.electrolink.assets.domain.model.valueobjects.Address;
 import com.hampcoders.electrolink.assets.domain.model.valueobjects.District;
 import com.hampcoders.electrolink.assets.domain.model.valueobjects.OwnerId;
 import com.hampcoders.electrolink.assets.domain.model.valueobjects.Region;
-import com.hampcoders.electrolink.assets.interfaces.rest.resource.CreatePropertyResource;
-import java.util.UUID;
+import com.hampcoders.electrolink.assets.interfaces.rest.resources.CreatePropertyResource;
 
 /**
  * Assembler to convert CreatePropertyResource into a CreatePropertyCommand.

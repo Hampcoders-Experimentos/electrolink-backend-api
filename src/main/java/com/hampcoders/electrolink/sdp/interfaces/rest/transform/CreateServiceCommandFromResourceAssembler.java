@@ -5,7 +5,7 @@ import com.hampcoders.electrolink.sdp.domain.model.entities.ComponentQuantity;
 import com.hampcoders.electrolink.sdp.domain.model.entities.Tag;
 import com.hampcoders.electrolink.sdp.domain.model.valueobjects.Policy;
 import com.hampcoders.electrolink.sdp.domain.model.valueobjects.Restriction;
-import com.hampcoders.electrolink.sdp.interfaces.rest.resource.CreateServiceResource;
+import com.hampcoders.electrolink.sdp.interfaces.rest.resources.CreateServiceResource;
 
 /**
  * Assembler class responsible for transforming a CreateServiceResource into a CreateServiceCommand.

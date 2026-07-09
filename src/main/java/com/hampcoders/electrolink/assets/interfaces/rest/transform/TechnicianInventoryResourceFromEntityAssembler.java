@@ -2,8 +2,8 @@ package com.hampcoders.electrolink.assets.interfaces.rest.transform;
 
 import com.hampcoders.electrolink.assets.domain.model.aggregates.TechnicianInventory;
 import com.hampcoders.electrolink.assets.domain.model.entities.ComponentStock;
-import com.hampcoders.electrolink.assets.interfaces.rest.resource.ComponentStockResource;
-import com.hampcoders.electrolink.assets.interfaces.rest.resource.TechnicianInventoryResource;
+import com.hampcoders.electrolink.assets.interfaces.rest.resources.ComponentStockResource;
+import com.hampcoders.electrolink.assets.interfaces.rest.resources.TechnicianInventoryResource;
 import java.util.stream.Collectors;
 
 /**

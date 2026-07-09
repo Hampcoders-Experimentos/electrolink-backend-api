@@ -22,12 +22,16 @@ public interface ServiceOperationRepository extends JpaRepository<ServiceOperati
   Optional<ServiceOperation> findById(Long id);
 
   /**
-   * Finds a service operation by its specific RequestId Value Object.
+   * Finds every service operation registered for a given RequestId.
+   *
+   * <p>A request may have more than one service operation associated with it, so this
+   * returns a list rather than an {@link Optional}. Returning an {@code Optional} here
+   * would throw {@code NonUniqueResultException} as soon as duplicates exist.</p>
    *
    * @param requestId The RequestId to search for.
-   * @return An Optional containing the found ServiceOperation, or empty if not found.
+   * @return The list of matching service operations (empty if none).
    */
-  Optional<ServiceOperation> findByRequestId(RequestId requestId);
+  List<ServiceOperation> findByRequestId(RequestId requestId);
 
   /**
    * Finds all service operations assigned to a specific technician.

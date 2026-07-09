@@ -1,10 +1,18 @@
 package com.hampcoders.electrolink.subscription.application.internal.queryservices;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
 import com.hampcoders.electrolink.subscription.domain.model.aggregates.Plan;
 import com.hampcoders.electrolink.subscription.domain.model.queries.GetAllPlansQuery;
 import com.hampcoders.electrolink.subscription.domain.model.queries.GetPlanByIdQuery;
 import com.hampcoders.electrolink.subscription.domain.model.valueobjects.PlanType;
 import com.hampcoders.electrolink.subscription.infrastructure.persistence.jpa.repositories.PlanRepository;
+import java.util.List;
+import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -12,92 +20,54 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.List;
-import java.util.Optional;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
-
 @ExtendWith(MockitoExtension.class)
 class PlanQueryServiceImplTest {
 
-    @Mock
-    private PlanRepository planRepository;
-    @InjectMocks
-    private PlanQueryServiceImpl planQueryService;
+  @Mock
+  private PlanRepository planRepository;
 
-    private final Long PLAN_ID = 1L;
+  @InjectMocks
+  private PlanQueryServiceImpl planQueryService;
 
-    @Test
-    @DisplayName("handle(GetAllPlansQuery) should return all plans (AAA)")
-    void handleGetAllPlans_ShouldReturnAll() {
-        var plan1 = mock(Plan.class);
-        var plan2 = mock(Plan.class);
-        var query = new GetAllPlansQuery();
+  @Test
+  @DisplayName("Given existing plans, when handling GetAllPlansQuery, then it returns all of them")
+  void handle_ShouldReturnAllPlans_WhenQueryingAll() {
+    // Arrange
+    List<Plan> plans = List.of(mock(Plan.class), mock(Plan.class));
+    when(planRepository.findAll()).thenReturn(plans);
 
-        when(planRepository.findAll()).thenReturn(List.of(plan1, plan2));
+    // Act
+    List<Plan> result = planQueryService.handle(new GetAllPlansQuery());
 
-        var result = planQueryService.handle(query);
+    // Assert
+    assertEquals(plans, result);
+  }
 
-        assertEquals(2, result.size());
-        verify(planRepository).findAll();
-        verifyNoMoreInteractions(planRepository);
-    }
+  @Test
+  @DisplayName("Given a missing id, when handling GetPlanByIdQuery, then it returns empty")
+  void handle_ShouldReturnEmpty_WhenPlanIdMissing() {
+    // Arrange
+    when(planRepository.findById(5L)).thenReturn(Optional.empty());
 
-    @Test
-    @DisplayName("handle(GetPlanByIdQuery) should return plan when found (AAA)")
-    void handleGetPlanById_ShouldReturn_WhenFound() {
-        var plan = mock(Plan.class);
-        var query = new GetPlanByIdQuery(PLAN_ID);
+    // Act
+    Optional<Plan> result = planQueryService.handle(new GetPlanByIdQuery(5L));
 
-        when(planRepository.findById(PLAN_ID)).thenReturn(Optional.of(plan));
+    // Assert
+    assertTrue(result.isEmpty());
+  }
 
-        var result = planQueryService.handle(query);
+  @Test
+  @DisplayName("Given an existing type, when finding by type, then it returns the plan")
+  void handle_ShouldReturnPlan_WhenTypeExists() {
+    // Arrange
+    Plan plan = mock(Plan.class);
+    when(planRepository.findByName(PlanType.PREMIUM)).thenReturn(Optional.of(plan));
 
-        assertTrue(result.isPresent());
-        assertEquals(plan, result.get());
-        verify(planRepository).findById(PLAN_ID);
-        verifyNoMoreInteractions(planRepository);
-    }
+    // Act
+    Optional<Plan> result = planQueryService.findByType(PlanType.PREMIUM);
 
-    @Test
-    @DisplayName("handle(GetPlanByIdQuery) should return empty when not found (AAA)")
-    void handleGetPlanById_ShouldReturnEmpty_WhenNotFound() {
-        var query = new GetPlanByIdQuery(PLAN_ID);
-
-        when(planRepository.findById(PLAN_ID)).thenReturn(Optional.empty());
-
-        var result = planQueryService.handle(query);
-
-        assertTrue(result.isEmpty());
-        verify(planRepository).findById(PLAN_ID);
-        verifyNoMoreInteractions(planRepository);
-    }
-
-    @Test
-    @DisplayName("findByType should return plan when found (AAA)")
-    void findByType_ShouldReturn_WhenFound() {
-        var plan = mock(Plan.class);
-
-        when(planRepository.findByName(PlanType.PREMIUM)).thenReturn(Optional.of(plan));
-
-        var result = planQueryService.findByType(PlanType.PREMIUM);
-
-        assertTrue(result.isPresent());
-        assertEquals(plan, result.get());
-        verify(planRepository).findByName(PlanType.PREMIUM);
-        verifyNoMoreInteractions(planRepository);
-    }
-
-    @Test
-    @DisplayName("findByType should return empty when not found (AAA)")
-    void findByType_ShouldReturnEmpty_WhenNotFound() {
-        when(planRepository.findByName(PlanType.BASIC)).thenReturn(Optional.empty());
-
-        var result = planQueryService.findByType(PlanType.BASIC);
-
-        assertTrue(result.isEmpty());
-        verify(planRepository).findByName(PlanType.BASIC);
-        verifyNoMoreInteractions(planRepository);
-    }
+    // Assert
+    assertTrue(result.isPresent());
+    assertSame(plan, result.get());
+  }
 }

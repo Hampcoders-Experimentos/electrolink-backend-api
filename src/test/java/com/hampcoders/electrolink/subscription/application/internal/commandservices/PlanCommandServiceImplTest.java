@@ -1,5 +1,11 @@
 package com.hampcoders.electrolink.subscription.application.internal.commandservices;
 
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
 import com.hampcoders.electrolink.subscription.domain.model.aggregates.Plan;
 import com.hampcoders.electrolink.subscription.domain.model.commands.CreatePlanCommand;
 import com.hampcoders.electrolink.subscription.domain.model.valueobjects.PlanType;
@@ -11,29 +17,53 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
-
 @ExtendWith(MockitoExtension.class)
 class PlanCommandServiceImplTest {
 
-    @Mock
-    private PlanRepository planRepository;
-    @InjectMocks
-    private PlanCommandServiceImpl planCommandService;
+  @Mock
+  private PlanRepository planRepository;
 
-    @Test
-    @DisplayName("handle(CreatePlanCommand) should create and save plan (AAA)")
-    void handleCreateCommand_ShouldCreate() {
-        var command = new CreatePlanCommand(PlanType.PREMIUM, "Premium plan", 29.99, 100, true);
+  @InjectMocks
+  private PlanCommandServiceImpl planCommandService;
 
-        when(planRepository.save(any(Plan.class))).thenAnswer(i -> i.getArgument(0));
+  @Test
+  @DisplayName("Given a basic plan command, when handling CreatePlanCommand, then it returns the saved plan")
+  void handle_ShouldReturnSavedPlan_WhenBasicPlanCreated() {
+    // Arrange
+    CreatePlanCommand command = new CreatePlanCommand(PlanType.BASIC, "desc", 9.99, 10, false);
+    Plan saved = mock(Plan.class);
+    when(planRepository.save(any(Plan.class))).thenReturn(saved);
 
-        var result = planCommandService.handle(command);
+    // Act
+    Plan result = planCommandService.handle(command);
 
-        assertNotNull(result);
-        verify(planRepository).save(any(Plan.class));
-        verifyNoMoreInteractions(planRepository);
-    }
+    // Assert
+    assertSame(saved, result);
+  }
+
+  @Test
+  @DisplayName("Given a premium plan command, when handling CreatePlanCommand, then it returns the saved plan")
+  void handle_ShouldReturnSavedPlan_WhenPremiumPlanCreated() {
+    // Arrange
+    CreatePlanCommand command = new CreatePlanCommand(PlanType.PREMIUM, "desc", 19.99, 100, true);
+    Plan saved = mock(Plan.class);
+    when(planRepository.save(any(Plan.class))).thenReturn(saved);
+
+    // Act
+    Plan result = planCommandService.handle(command);
+
+    // Assert
+    assertSame(saved, result);
+  }
+
+  @Test
+  @DisplayName("Given the repository fails, when handling CreatePlanCommand, then it propagates the exception")
+  void handle_ShouldPropagateException_WhenSaveFails() {
+    // Arrange
+    CreatePlanCommand command = new CreatePlanCommand(PlanType.BASIC, "desc", 9.99, 10, false);
+    when(planRepository.save(any(Plan.class))).thenThrow(new RuntimeException("DB error"));
+
+    // Act & Assert
+    assertThrows(RuntimeException.class, () -> planCommandService.handle(command));
+  }
 }

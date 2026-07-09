@@ -1,49 +1,60 @@
 package com.hampcoders.electrolink.monitoring.interfaces.rest.transform;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
 import com.hampcoders.electrolink.monitoring.domain.model.aggregates.Report;
 import com.hampcoders.electrolink.monitoring.domain.model.valueobjects.ReportType;
 import com.hampcoders.electrolink.monitoring.interfaces.rest.resources.ReportResource;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.mockito.Mockito.*;
+class ReportResourceFromEntityAssemblerTest {
 
-public class ReportResourceFromEntityAssemblerTest {
-    @Test
-    @DisplayName("toResourceFromEntity should correctly map Report entity to ReportResource (AAA)")
-    void toResourceFromEntity_ShouldMapEntityToResource() {
-        // Arrange
-        Long reportId = 1L;
-        Long serviceOperationId = 20L;
-        String description = "Faulty wiring detected.";
-        ReportType reportType = ReportType.MAINTENANCE;
+  @Test
+  @DisplayName("Given a report, when assembling, then it maps id, operation id, description and type")
+  void handle_ShouldMapAllFields_WhenReportProvided() {
+    // Arrange
+    Report report = mock(Report.class);
+    when(report.getId()).thenReturn(7L);
+    when(report.getServiceOperationId()).thenReturn(10L);
+    when(report.getDescription()).thenReturn("desc");
+    when(report.getReportType()).thenReturn(ReportType.INCIDENT);
 
-        Report entity = mock(Report.class);
-        when(entity.getId()).thenReturn(reportId);
-        when(entity.getServiceOperationId()).thenReturn(serviceOperationId);
-        when(entity.getDescription()).thenReturn(description);
-        when(entity.getReportType()).thenReturn(reportType);
+    // Act
+    ReportResource resource = ReportResourceFromEntityAssembler.toResourceFromEntity(report);
 
-        // Act
-        ReportResource resource = ReportResourceFromEntityAssembler.toResourceFromEntity(entity);
+    // Assert
+    assertEquals(7L, resource.id());
+    assertEquals(10L, resource.serviceOperationId());
+    assertEquals("desc", resource.description());
+    assertEquals("INCIDENT", resource.reportType());
+  }
 
-        // Assert
-        assertNotNull(resource, "El recurso retornado no debe ser nulo.");
+  @Test
+  @DisplayName("Given another report, when assembling, then it maps the new type")
+  void handle_ShouldMapNewType_WhenDifferentReportProvided() {
+    // Arrange
+    Report report = mock(Report.class);
+    when(report.getId()).thenReturn(8L);
+    when(report.getServiceOperationId()).thenReturn(11L);
+    when(report.getDescription()).thenReturn("done");
+    when(report.getReportType()).thenReturn(ReportType.COMPLETION);
 
-        assertEquals(reportId, resource.id(), "El ID del Reporte debe coincidir.");
-        assertEquals(serviceOperationId, resource.serviceOperationId(),
-                "El RequestId debe extraerse correctamente del Value Object.");
-        assertEquals(description, resource.description(),
-                "La descripción debe coincidir.");
-        assertEquals(reportType.name(), resource.reportType(),
-                "El ReportType debe convertirse a String (nombre del enum).");
+    // Act
+    ReportResource resource = ReportResourceFromEntityAssembler.toResourceFromEntity(report);
 
-        verify(entity).getId();
-        verify(entity).getServiceOperationId();
-        verify(entity).getDescription();
-        verify(entity).getReportType();
-        verifyNoMoreInteractions(entity);
-    }
+    // Assert
+    assertEquals("COMPLETION", resource.reportType());
+  }
+
+  @Test
+  @DisplayName("Given a null report, when assembling, then it throws NullPointerException")
+  void handle_ShouldThrowNullPointer_WhenReportIsNull() {
+    // Act & Assert
+    assertThrows(NullPointerException.class,
+        () -> ReportResourceFromEntityAssembler.toResourceFromEntity(null));
+  }
 }

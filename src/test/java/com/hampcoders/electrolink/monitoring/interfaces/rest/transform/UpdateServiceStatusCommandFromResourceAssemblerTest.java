@@ -1,30 +1,50 @@
 package com.hampcoders.electrolink.monitoring.interfaces.rest.transform;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
 import com.hampcoders.electrolink.monitoring.domain.model.commands.UpdateServiceStatusCommand;
 import com.hampcoders.electrolink.monitoring.interfaces.rest.resources.UpdateServiceStatusResource;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+class UpdateServiceStatusCommandFromResourceAssemblerTest {
 
-public class UpdateServiceStatusCommandFromResourceAssemblerTest {
-    @Test
-    @DisplayName("toCommandFromResource should correctly map UpdateServiceStatusResource to UpdateServiceStatusCommand (AAA)")
-    void toCommandFromResource_ShouldMapResourceToCommand() {
-        // Arrange
-        Long serviceOperationId = 40L;
-        String status = "COMPLETED";
+  @Test
+  @DisplayName("Given a resource, when assembling, then it maps id and status")
+  void handle_ShouldMapAllFields_WhenResourceProvided() {
+    // Arrange
+    UpdateServiceStatusResource resource = new UpdateServiceStatusResource(10L, "COMPLETED");
 
-        var resource = new UpdateServiceStatusResource(serviceOperationId, status);
+    // Act
+    UpdateServiceStatusCommand command =
+        UpdateServiceStatusCommandFromResourceAssembler.toCommandFromResource(resource);
 
-        // Act
-        UpdateServiceStatusCommand command = UpdateServiceStatusCommandFromResourceAssembler.toCommandFromResource(resource);
+    // Assert
+    assertEquals(10L, command.serviceOperationId());
+    assertEquals("COMPLETED", command.newStatus());
+  }
 
-        // Assert
-        assertNotNull(command, "El comando retornado no debe ser nulo.");
+  @Test
+  @DisplayName("Given a different status, when assembling, then it maps the new status")
+  void handle_ShouldMapNewStatus_WhenDifferentResourceProvided() {
+    // Arrange
+    UpdateServiceStatusResource resource = new UpdateServiceStatusResource(11L, "CANCELLED");
 
-        assertEquals(serviceOperationId, command.serviceOperationId(), "El Service Operation ID debe coincidir.");
-        assertEquals(status, command.newStatus(), "El nuevo estado debe coincidir.");
-    }
+    // Act
+    UpdateServiceStatusCommand command =
+        UpdateServiceStatusCommandFromResourceAssembler.toCommandFromResource(resource);
+
+    // Assert
+    assertEquals(11L, command.serviceOperationId());
+    assertEquals("CANCELLED", command.newStatus());
+  }
+
+  @Test
+  @DisplayName("Given a null resource, when assembling, then it throws NullPointerException")
+  void handle_ShouldThrowNullPointer_WhenResourceIsNull() {
+    // Act & Assert
+    assertThrows(NullPointerException.class,
+        () -> UpdateServiceStatusCommandFromResourceAssembler.toCommandFromResource(null));
+  }
 }

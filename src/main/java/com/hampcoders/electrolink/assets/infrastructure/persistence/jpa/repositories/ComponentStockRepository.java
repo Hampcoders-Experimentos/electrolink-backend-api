@@ -16,17 +16,21 @@ import org.springframework.stereotype.Repository;
 public interface ComponentStockRepository extends JpaRepository<ComponentStock, UUID> {
 
   /**
-   * Finds a specific ComponentStock item by the containing inventory ID and the component's UID.
+   * Finds a specific ComponentStock item by the owning technician's ID and the component's UID.
    *
-   * @param technicianInventoryId The ID of the technician's inventory.
+   * <p>Matches the inventory's {@code technicianId} (a {@code Long}), not its {@code id}
+   * (a {@code UUID} primary key). The caller passes the technician id, so comparing it to the
+   * UUID {@code id} fails with an argument-type mismatch.</p>
+   *
+   * @param technicianId The ID of the technician that owns the inventory.
    * @param componentUid The unique ID of the component.
    * @return An Optional containing the ComponentStock, or empty if not found.
    */
   @Query("SELECT cs FROM ComponentStock cs "
-      + "WHERE cs.technicianInventory.id = :technicianInventoryId "
+      + "WHERE cs.technicianInventory.technicianId = :technicianId "
       + "AND cs.component.componentUid = :componentUid")
   Optional<ComponentStock> findByTechnicianInventoryIdAndComponentUid(
-      @Param("technicianInventoryId") Long technicianInventoryId,
+      @Param("technicianId") Long technicianId,
       @Param("componentUid") Long componentUid);
 
   /**

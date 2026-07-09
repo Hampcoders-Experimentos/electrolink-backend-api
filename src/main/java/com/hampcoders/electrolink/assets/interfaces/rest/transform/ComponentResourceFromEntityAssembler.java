@@ -1,7 +1,7 @@
 package com.hampcoders.electrolink.assets.interfaces.rest.transform;
 
 import com.hampcoders.electrolink.assets.domain.model.aggregates.Component;
-import com.hampcoders.electrolink.assets.interfaces.rest.resource.ComponentResource;
+import com.hampcoders.electrolink.assets.interfaces.rest.resources.ComponentResource;
 
 
 /**

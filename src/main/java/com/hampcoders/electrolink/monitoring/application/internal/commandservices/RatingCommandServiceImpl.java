@@ -1,7 +1,6 @@
 package com.hampcoders.electrolink.monitoring.application.internal.commandservices;
 
 import com.hampcoders.electrolink.monitoring.domain.model.aggregates.Rating;
-import com.hampcoders.electrolink.monitoring.domain.model.aggregates.ServiceOperation;
 import com.hampcoders.electrolink.monitoring.domain.model.commands.AddRatingCommand;
 import com.hampcoders.electrolink.monitoring.domain.model.commands.DeleteRatingCommand;
 import com.hampcoders.electrolink.monitoring.domain.model.commands.UpdateRatingCommand;
@@ -37,12 +36,17 @@ public class RatingCommandServiceImpl implements RatingCommandService {
   @Transactional
   public Long handle(AddRatingCommand command) {
 
-    ServiceOperation serviceOperation = serviceOperationRepository
-        .findByRequestId(command.requestId())
-        .orElseThrow(() -> new IllegalArgumentException(
-            "No ServiceOperation found for the given RequestId"));
+    var serviceOperations = serviceOperationRepository.findByRequestId(command.requestId());
 
-    if (serviceOperation.getStatus() != ServiceStatus.COMPLETED) {
+    if (serviceOperations.isEmpty()) {
+      throw new IllegalArgumentException(
+          "No ServiceOperation found for the given RequestId");
+    }
+
+    boolean hasCompletedOperation = serviceOperations.stream()
+        .anyMatch(operation -> operation.getStatus() == ServiceStatus.COMPLETED);
+
+    if (!hasCompletedOperation) {
       throw new IllegalStateException(
           "Cannot add rating: associated ServiceOperation is not completed.");
     }

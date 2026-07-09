@@ -11,4 +11,26 @@ package com.hampcoders.electrolink.monitoring.domain.model.commands;
 public record AddPhotoCommand(Long reportId, byte[] photoData,
                               String fileName, String contentType) {
 
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (!(o instanceof AddPhotoCommand that)) {
+      return false;
+    }
+    return ReportPhotoPayloadSupport.payloadEquals(reportId, photoData, fileName, contentType,
+        that.reportId, that.photoData, that.fileName, that.contentType);
+  }
+
+  @Override
+  public int hashCode() {
+    return ReportPhotoPayloadSupport.payloadHashCode(reportId, photoData, fileName, contentType);
+  }
+
+  @Override
+  public String toString() {
+    return ReportPhotoPayloadSupport.payloadToString("AddPhotoCommand",
+        reportId, photoData, fileName, contentType);
+  }
 }

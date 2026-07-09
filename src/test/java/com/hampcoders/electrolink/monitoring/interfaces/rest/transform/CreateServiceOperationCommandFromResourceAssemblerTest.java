@@ -1,43 +1,58 @@
 package com.hampcoders.electrolink.monitoring.interfaces.rest.transform;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
+import com.hampcoders.electrolink.monitoring.domain.model.commands.CreateServiceOperationCommand;
 import com.hampcoders.electrolink.monitoring.domain.model.valueobjects.RequestId;
 import com.hampcoders.electrolink.monitoring.domain.model.valueobjects.ServiceStatus;
 import com.hampcoders.electrolink.monitoring.domain.model.valueobjects.TechnicianId;
 import com.hampcoders.electrolink.monitoring.interfaces.rest.resources.CreateServiceOperationResource;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.mockito.MockedStatic;
-import org.mockito.Mockito;
 
-import java.time.OffsetDateTime;
+class CreateServiceOperationCommandFromResourceAssemblerTest {
 
-import static org.junit.jupiter.api.Assertions.*;
+  @Test
+  @DisplayName("Given a resource, when assembling, then it maps ids and defaults to IN_PROGRESS")
+  void handle_ShouldMapFieldsAndDefaultStatus_WhenResourceProvided() {
+    // Arrange
+    CreateServiceOperationResource resource = new CreateServiceOperationResource(1L, 2L);
 
-public class CreateServiceOperationCommandFromResourceAssemblerTest {
-    @Test
-    @DisplayName("toCommandFromResource should map resource and assign default values correctly (AAA)")
-    void toCommandFromResource_ShouldMapResourceAndAssignDefaults() {
-        // Arrange
-        Long requestId = 50L;
-        Long technicianId = 99L;
+    // Act
+    CreateServiceOperationCommand command =
+        CreateServiceOperationCommandFromResourceAssembler.toCommandFromResource(resource);
 
-        OffsetDateTime fixedTime = OffsetDateTime.parse("2025-10-05T10:00:00Z");
+    // Assert
+    assertEquals(new RequestId(1L), command.requestId());
+    assertEquals(new TechnicianId(2L), command.technicianId());
+    assertEquals(ServiceStatus.IN_PROGRESS, command.currentStatus());
+    assertNotNull(command.startedAt());
+    assertNull(command.completedAt());
+  }
 
-        var resource = new CreateServiceOperationResource(requestId, technicianId);
+  @Test
+  @DisplayName("Given different ids, when assembling, then it maps the new ids")
+  void handle_ShouldMapNewIds_WhenDifferentResourceProvided() {
+    // Arrange
+    CreateServiceOperationResource resource = new CreateServiceOperationResource(9L, 8L);
 
-        try (MockedStatic<OffsetDateTime> mockedStatic = Mockito.mockStatic(OffsetDateTime.class)) {
-            mockedStatic.when(OffsetDateTime::now).thenReturn(fixedTime);
+    // Act
+    CreateServiceOperationCommand command =
+        CreateServiceOperationCommandFromResourceAssembler.toCommandFromResource(resource);
 
-            // Act
-            var command = CreateServiceOperationCommandFromResourceAssembler.toCommandFromResource(resource);
+    // Assert
+    assertEquals(new RequestId(9L), command.requestId());
+    assertEquals(new TechnicianId(8L), command.technicianId());
+  }
 
-            // Assert
-            assertNotNull(command, "The command should not be null.");
-            assertEquals(new RequestId(requestId), command.requestId(), "RequestId should be mapped correctly.");
-            assertEquals(new TechnicianId(technicianId), command.technicianId(), "TechnicianId should be mapped correctly.");
-            assertEquals(fixedTime, command.startedAt(), "startedAt should be set to the mocked current time.");
-            assertNull(command.completedAt(), "completedAt should be null by default.");
-            assertEquals(ServiceStatus.IN_PROGRESS, command.currentStatus(), "currentStatus should default to IN_PROGRESS.");
-        }
-    }
+  @Test
+  @DisplayName("Given a null resource, when assembling, then it throws NullPointerException")
+  void handle_ShouldThrowNullPointer_WhenResourceIsNull() {
+    // Act & Assert
+    assertThrows(NullPointerException.class,
+        () -> CreateServiceOperationCommandFromResourceAssembler.toCommandFromResource(null));
+  }
 }
