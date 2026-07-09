@@ -5,6 +5,7 @@ pipeline {
     jdk 'JDK_21'
   }
 	environment {
+	    REGISTRY_USER = "legendnt"
         IMAGE_NAME = "electrolink-backend-api"
         TAG        = "${env.BUILD_NUMBER}"
     }
@@ -65,22 +66,18 @@ pipeline {
         }
      }
 
-	  stage('Construir Imagen Docker') {
+	  stage('Construir y Publicar Imagen Docker') {
             steps {
-                script {
-                    echo "Iniciando la construcción de la imagen de Docker: ${IMAGE_NAME}:${TAG}"
+                // Nos autenticamos de forma segura en Docker Hub usando el ID de credenciales de Jenkins
+                withCredentials([usernamePassword(credentialsId: 'DOCKER_HUB_CREDENTIALS', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
+                    script {
+                        echo "Iniciando sesión en Docker Hub..."
+                        sh "echo '${DOCKER_PASS}' | docker login -u '${DOCKER_USER}' --password-stdin"
 
-                    // Ejecuta el comando de Docker utilizando el socket compartido del Host
-                    // Supone que tienes un archivo 'Dockerfile' en la raíz de tu proyecto Spring Boot
-                    //sh "docker build -t ${IMAGE_NAME}:${TAG} ."
-                    //sh "docker build -t ${IMAGE_NAME}:latest ."
-
-					echo "Construyendo imagen híbrida/compatible con servidores de producción (AMD64)..."
-					// Usamos 'buildx' para asegurar que la imagen de salida sea estrictamente para plataformas de 64 bits estándar
-					sh "docker buildx build --platform linux/amd64 -t ${IMAGE_NAME}:${TAG} --load ."
-					sh "docker buildx build --platform linux/amd64 -t ${IMAGE_NAME}:latest --load ."
-
-                    echo "Imagen construida exitosamente."
+                        echo "Construyendo imagen optimizada AMD64..."
+                        // Compilamos forzando la plataforma AMD64 para evitar el error 'exec format error' en Render
+                         sh "docker buildx build --platform linux/amd64 -t ${REGISTRY_USER}/${IMAGE_NAME}:${TAG} -t ${REGISTRY_USER}/${IMAGE_NAME}:latest --push ."
+                    }
                 }
             }
         }
