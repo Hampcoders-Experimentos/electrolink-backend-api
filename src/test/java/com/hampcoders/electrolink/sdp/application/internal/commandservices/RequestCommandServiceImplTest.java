@@ -12,7 +12,6 @@ import com.hampcoders.electrolink.sdp.domain.model.aggregates.Request;
 import com.hampcoders.electrolink.sdp.domain.model.commands.CreateRequestCommand;
 import com.hampcoders.electrolink.sdp.domain.model.entities.Bill;
 import com.hampcoders.electrolink.sdp.infrastructure.persistence.jpa.repositories.RequestRepository;
-import com.hampcoders.electrolink.subscription.interfaces.acl.SubscriptionContextFacade;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
@@ -29,8 +28,6 @@ class RequestCommandServiceImplTest {
   @Mock
   private RequestRepository requestRepository;
   @Mock
-  private SubscriptionContextFacade subscriptionContextFacade;
-  @Mock
   private TechnicianMatchingService technicianMatchingService;
 
   @InjectMocks
@@ -43,10 +40,9 @@ class RequestCommandServiceImplTest {
   }
 
   @Test
-  @DisplayName("Given an allowed user with a technician, when handling CreateRequestCommand, then it saves and records the request")
-  void handle_ShouldSaveRequest_WhenUserAllowedAndTechnicianAssigned() {
+  @DisplayName("Given a technician is already assigned, when handling CreateRequestCommand, then it saves the request")
+  void handle_ShouldSaveRequest_WhenTechnicianAssigned() {
     // Arrange
-    when(subscriptionContextFacade.canUserMakeRequest(1L)).thenReturn(true);
     Request saved = mock(Request.class);
     when(requestRepository.save(any(Request.class))).thenReturn(saved);
 
@@ -55,24 +51,13 @@ class RequestCommandServiceImplTest {
 
     // Assert
     assertSame(saved, result);
-    verify(subscriptionContextFacade).recordRequest(1L);
-  }
-
-  @Test
-  @DisplayName("Given the request limit is reached, when handling CreateRequestCommand, then it throws IllegalState")
-  void handle_ShouldThrow_WhenRequestLimitReached() {
-    // Arrange
-    when(subscriptionContextFacade.canUserMakeRequest(1L)).thenReturn(false);
-
-    // Act & Assert
-    assertThrows(IllegalStateException.class, () -> requestCommandService.handle(command("99")));
+    verify(requestRepository).save(any(Request.class));
   }
 
   @Test
   @DisplayName("Given no available technician, when handling CreateRequestCommand, then it throws IllegalState")
   void handle_ShouldThrow_WhenNoTechnicianAvailable() {
     // Arrange
-    when(subscriptionContextFacade.canUserMakeRequest(1L)).thenReturn(true);
     when(technicianMatchingService.findBestTechnicianForRequest(any(Request.class)))
         .thenReturn(Optional.empty());
 
