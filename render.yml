@@ -1,0 +1,54 @@
+services:
+  # Web Service - Spring Boot API (electrolink)
+  - type: web
+    name: electrolink-backend-api
+    env: java
+    region: oregon
+    plan: free
+    buildCommand: mvn clean package -DskipTests
+    # Ajustado al nombre de tu archivo .jar según se ve en tus capturas de Jenkins
+    startCommand: java -Dserver.port=$PORT $JAVA_OPTS -jar target/electrolink-platform-0.0.1-SNAPSHOT.jar
+    envVars:
+      - key: PORT
+        value: "8091"
+      - key: JAVA_OPTS
+        value: "-Xmx512m -Xms256m"
+
+      # Mapeo de variables exactas para tu application.properties extraídas de la base de datos de Render
+      - key: DB_HOST
+        fromDatabase:
+          name: electrolink-db
+          property: host
+      - key: DB_PORT
+        fromDatabase:
+          name: electrolink-db
+          property: port
+      - key: DB_NAME
+        fromDatabase:
+          name: electrolink-db
+          property: database
+      - key: DB_USERNAME
+        fromDatabase:
+          name: electrolink-db
+          property: user
+      - key: DB_PASSWORD
+        fromDatabase:
+          name: electrolink-db
+          property: password
+
+      # Configuración JWT y Cloudinary requeridas por tu properties (puedes dejarlas vacías o poner valores por defecto)
+      - key: CLOUDINARY_CLOUD_NAME
+        value: ""
+      - key: CLOUDINARY_API_KEY
+        value: ""
+      - key: CLOUDINARY_API_SECRET
+        value: ""
+
+    healthCheckPath: /actuator/health
+
+databases:
+  # PostgreSQL Database para Electrolink
+  - name: electrolink-db
+    databaseName: electrolink_spring_pruebas
+    plan: free
+    region: oregon
